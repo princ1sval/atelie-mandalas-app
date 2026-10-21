@@ -1,22 +1,76 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PortfolioScreenProps } from '../../navigation/types';
+import { usePortfolioViewModel } from '../../viewmodel/usePortfolioViewModel';
+import { Chip } from '../components/Chip';
+import { GradeMandalas } from '../components/GradeMandalas';
+import { MensagemEstado } from '../components/MensagemEstado';
+import { TituloSecao } from '../components/TituloSecao';
 import { colors, spacing, typography } from '../styles/theme';
 
-// TELA PROVISÓRIA (Etapa 4) — a lista de verdade vem na Etapa 6.
 export function PortfolioScreen({ navigation }: PortfolioScreenProps) {
+  const vm = usePortfolioViewModel();
+
+  function abrirDetalhe(mandalaId: string) {
+    navigation.navigate('DetalheMandala', { mandalaId });
+  }
+
+  function renderizarConteudo() {
+    if (vm.carregando) {
+      return <MensagemEstado tipo="carregando" />;
+    }
+    if (vm.erro) {
+      return <MensagemEstado tipo="erro" mensagem={vm.erro} onTentarNovamente={vm.recarregar} />;
+    }
+    return (
+      <GradeMandalas
+        mandalas={vm.mandalas}
+        onAbrirMandala={abrirDetalhe}
+        mensagemVazia="Ainda não há encomendas com esse tema."
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.tela} edges={['top']}>
-      <Text style={typography.titulo}>Portfólio</Text>
+      <View style={styles.cabecalho}>
+        <TituloSecao
+          nivel="tela"
+          sobretitulo="encomendas entregues"
+          titulo="Portfólio"
+          descricao="Cada mandala conta a história de quem encomendou."
+        />
+      </View>
 
-      <Pressable onPress={() => navigation.navigate('DetalheMandala', { mandalaId: 'enc-patinhas' })}>
-        <Text style={styles.link}>Abrir "Patinhas" →</Text>
-      </Pressable>
+      {/* Filtro por tema: chips numa linha que rola para o lado */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chips}
+        contentContainerStyle={styles.chipsConteudo}
+      >
+        {vm.opcoesFiltro.map((opcao) => (
+          <Chip
+            key={opcao.valor}
+            rotulo={opcao.rotulo}
+            selecionado={vm.filtro === opcao.valor}
+            onPress={() => vm.selecionarFiltro(opcao.valor)}
+          />
+        ))}
+      </ScrollView>
+
+      {!vm.carregando && !vm.erro ? <Text style={[typography.pequeno, styles.resumo]}>{vm.resumo}</Text> : null}
+
+      {renderizarConteudo()}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  tela: { flex: 1, gap: spacing.md, padding: spacing.lg, backgroundColor: colors.fundo },
-  link: { ...typography.rotulo, color: colors.primariaEscura },
+  tela: { flex: 1, backgroundColor: colors.fundo },
+  cabecalho: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.md },
+  // Sem flexGrow: 0, a ScrollView horizontal "cresce" e ocupa metade da tela.
+  chips: { flexGrow: 0 },
+  chipsConteudo: { gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.xs },
+  resumo: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
 });

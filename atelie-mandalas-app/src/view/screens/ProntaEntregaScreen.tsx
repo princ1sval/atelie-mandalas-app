@@ -1,10 +1,9 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProntaEntregaScreenProps } from '../../navigation/types';
 import { useProntaEntregaViewModel } from '../../viewmodel/useProntaEntregaViewModel';
-import { useGrade } from '../hooks/useGrade';
 import { CampoTexto } from '../components/CampoTexto';
-import { MandalaCard } from '../components/MandalaCard';
+import { GradeMandalas } from '../components/GradeMandalas';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
 import { colors, spacing, typography } from '../styles/theme';
@@ -12,7 +11,6 @@ import { colors, spacing, typography } from '../styles/theme';
 // A tela só DESENHA: os dados e as ações vêm do ViewModel.
 export function ProntaEntregaScreen({ navigation }: ProntaEntregaScreenProps) {
   const vm = useProntaEntregaViewModel();
-  const { colunas, larguraCard } = useGrade();
 
   // Navegar é papel da View: o ViewModel não conhece a navegação.
   function abrirDetalhe(mandalaId: string) {
@@ -27,22 +25,10 @@ export function ProntaEntregaScreen({ navigation }: ProntaEntregaScreenProps) {
       return <MensagemEstado tipo="erro" mensagem={vm.erro} onTentarNovamente={vm.recarregar} />;
     }
     return (
-      <FlatList
-        key={`grade-${colunas}`} // numColumns não pode mudar "ao vivo": a key nova recria a lista
-        data={vm.mandalas}
-        keyExtractor={(mandala) => mandala.id}
-        numColumns={colunas}
-        renderItem={({ item }) => (
-          <MandalaCard mandala={item} onPress={() => abrirDetalhe(item.id)} style={{ width: larguraCard }} />
-        )}
-        columnWrapperStyle={styles.linha}
-        contentContainerStyle={styles.lista}
-        ListEmptyComponent={
-          <MensagemEstado tipo="vazio" mensagem="Nenhuma peça encontrada. Tente outro nome ou cor." />
-        }
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        showsVerticalScrollIndicator={false}
+      <GradeMandalas
+        mandalas={vm.mandalas}
+        onAbrirMandala={abrirDetalhe}
+        mensagemVazia="Nenhuma peça encontrada. Tente outro nome ou cor."
       />
     );
   }
@@ -82,6 +68,4 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
   },
-  lista: { gap: spacing.md, paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
-  linha: { gap: spacing.md }, // espaço entre as colunas
 });
