@@ -69,8 +69,8 @@ export function PortfolioScreen({ navigation }: PortfolioScreenProps) {
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.fundo },
   cabecalho: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.md },
-  // Sem flexGrow: 0, a ScrollView horizontal "cresce" e ocupa metade da tela.
-  chips: { flexGrow: 0 },
+    // Sem isto a ScrollView horizontal estica (flexGrow) ou é espremida pela lista (flexShrink).
+  chips: { flexGrow: 0, flexShrink: 0 },
   chipsConteudo: { gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.xs },
   resumo: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
 });

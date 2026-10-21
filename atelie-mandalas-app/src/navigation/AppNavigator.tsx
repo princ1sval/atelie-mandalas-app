@@ -30,7 +30,7 @@ export function AppNavigator() {
         tabBarActiveTintColor: colors.primariaEscura,
         tabBarInactiveTintColor: colors.abaInativa,
         tabBarStyle: { backgroundColor: colors.superficie, borderTopColor: colors.borda },
-        tabBarLabelStyle: { fontFamily: fonts.corpoMedio, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: fonts.corpoMedio, fontSize: 10 },
         tabBarIconStyle: styles.areaIcone, // espaço para a "pílula" caber
         // Aba ativa: ícone dentro de uma pílula verde-clara, como no canvas.
         tabBarIcon: ({ focused, color }) => (
