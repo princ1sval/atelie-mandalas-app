@@ -25,6 +25,7 @@ export const colors = {
   borda: '#E3DCC6',
   erro: '#A1412F',
   sombra: '#2E3127',
+  sobreposicao: 'rgba(46, 49, 39, 0.5)',
 } as const;
 
 // Tipo com o nome de todas as cores: 'fundo' | 'superficie' | 'primaria' | ...
