@@ -23,8 +23,15 @@ async function linkDuvida(): Promise<string> {
   return montarLinkWhatsApp(atelie.whatsapp, 'Olá, Malu! Vim pelo app e tenho uma dúvida.');
 }
 
+// Texto do botão "compartilhar" do Detalhe.
+async function textoCompartilhamento(mandala: Mandala): Promise<string> {
+  const atelie = await atelieRepository.obter();
+  return `Olha que linda a mandala "${mandala.nome}" da ${atelie.nome}! Conheça mais no Instagram: ${atelie.instagram}`;
+}
+
 export const AtelieService = {
   obterInformacoes,
   linkInteresse,
   linkDuvida,
+  textoCompartilhamento,
 };
