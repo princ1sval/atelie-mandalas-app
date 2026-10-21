@@ -7,7 +7,7 @@ import { BotaoPrimario } from '../components/BotaoPrimario';
 import { CampoTexto } from '../components/CampoTexto';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
-import { colors, fonts, fontSizes, radius, spacing, typography } from '../styles/theme';
+import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
 
 export function FaqScreen() {
   const vm = useFaqViewModel();
@@ -109,12 +109,13 @@ function ItemPergunta({ pergunta, aberta, onPress }: ItemPerguntaProps) {
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.fundo },
   cabecalho: {
+    ...larguraMaxima,
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.sm,
   },
-  lista: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
+  lista: { ...larguraMaxima, paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
   cabecalhoSecao: { paddingTop: spacing.lg, paddingBottom: spacing.md },
   item: {
     marginBottom: spacing.sm,

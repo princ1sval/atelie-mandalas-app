@@ -7,7 +7,7 @@ import { AcaoDetalhe } from '../../services/MandalaService';
 import { BotaoPrimario } from '../components/BotaoPrimario';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
-import { colors, fonts, fontSizes, radius, spacing, typography } from '../styles/theme';
+import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
 import { NomeIcone } from '../styles/icons';
 
 // Ícone do botão principal conforme o tipo da ação (escolha visual: fica na View).
@@ -101,7 +101,7 @@ export function DetalheMandalaScreen({ route, navigation }: DetalheMandalaScreen
 }
 
 const styles = StyleSheet.create({
-  conteudo: { gap: spacing.lg, padding: spacing.lg, paddingBottom: spacing.xxl },
+  conteudo: { ...larguraMaxima, gap: spacing.lg, padding: spacing.lg, paddingBottom: spacing.xxl },
   fundoImagem: {
     aspectRatio: 1,
     alignItems: 'center',

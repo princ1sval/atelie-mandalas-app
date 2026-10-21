@@ -6,7 +6,7 @@ import { useInicioViewModel } from '../../viewmodel/useInicioViewModel';
 import { BotaoPrimario } from '../components/BotaoPrimario';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
-import { colors, fonts, fontSizes, radius, spacing, typography } from '../styles/theme';
+import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
 import { NomeIcone } from '../styles/icons';
 
 // Imagens da identidade visual (decoração da tela, não são dados do app).
@@ -133,7 +133,7 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
 
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.fundo },
-  conteudo: { gap: spacing.xxl, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
+  conteudo: { ...larguraMaxima, gap: spacing.xxl, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
 
   // Topo
   hero: {

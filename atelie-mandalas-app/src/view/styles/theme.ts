@@ -15,5 +15,8 @@ const shadow = Platform.select<ViewStyle>({
   default: {},
 });
 
+// Em telas largas (tablet), o conteúdo para nesta largura e fica centralizado.
+const larguraMaxima: ViewStyle = { width: '100%', maxWidth: 640, alignSelf: 'center' };
+
 // Porta de entrada do tema: telas e componentes importam tudo daqui.
-export { colors, spacing, radius, fonts, fontSizes, typography, shadow };
+export { colors, spacing, radius, fonts, fontSizes, typography, shadow, larguraMaxima };

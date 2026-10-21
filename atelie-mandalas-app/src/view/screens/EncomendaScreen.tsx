@@ -7,7 +7,7 @@ import { BotaoPrimario } from '../components/BotaoPrimario';
 import { CampoTexto } from '../components/CampoTexto';
 import { Chip } from '../components/Chip';
 import { TituloSecao } from '../components/TituloSecao';
-import { colors, fonts, fontSizes, radius, spacing, typography } from '../styles/theme';
+import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
 
 export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
   // Parâmetros opcionais: chegam quando a pessoa vem do "Quero uma assim".
@@ -184,7 +184,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
 
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.fundo },
-  conteudo: { gap: spacing.lg, padding: spacing.lg, paddingBottom: spacing.xxl },
+  conteudo: { ...larguraMaxima, gap: spacing.lg, padding: spacing.lg, paddingBottom: spacing.xxl },
   inspiracao: {
     flexDirection: 'row',
     alignItems: 'center',
