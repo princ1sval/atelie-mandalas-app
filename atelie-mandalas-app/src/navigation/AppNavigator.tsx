@@ -1,6 +1,6 @@
-import { ComponentProps } from 'react';
 import Feather from '@expo/vector-icons/Feather';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NomeIcone } from '../view/styles/icons';
 import { RootTabParamList } from './types';
 import { ProntaEntregaStack } from './ProntaEntregaStack';
 import { PortfolioStack } from './PortfolioStack';
@@ -10,9 +10,6 @@ import { FaqScreen } from '../view/screens/FaqScreen';
 import { colors, fonts } from '../view/styles/theme';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
-
-// Ícone de cada aba (nomes do pacote Feather).
-type NomeIcone = ComponentProps<typeof Feather>['name'];
 
 const ICONES: Record<keyof RootTabParamList, NomeIcone> = {
   Inicio: 'home',
