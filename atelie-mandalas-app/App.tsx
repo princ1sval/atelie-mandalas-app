@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -8,6 +9,7 @@ import { Poppins_400Regular } from '@expo-google-fonts/poppins/400Regular';
 import { Poppins_500Medium } from '@expo-google-fonts/poppins/500Medium';
 import { Poppins_600SemiBold } from '@expo-google-fonts/poppins/600SemiBold';
 import { colors, radius, spacing, typography } from './src/view/styles/theme';
+import { testarCamadas } from './src/testeCamadas';
 
 export default function App() {
   const [fontesCarregadas, erroFontes] = useFonts({
@@ -18,6 +20,10 @@ export default function App() {
     Poppins_500Medium,
     Poppins_600SemiBold,
   });
+
+  useEffect(() => {
+    testarCamadas();
+  }, []);
 
   // Enquanto as fontes carregam, mostra um indicador.
   // Se der erro, segue com a fonte do sistema em vez de travar o app.
