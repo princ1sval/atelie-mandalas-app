@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -9,6 +10,7 @@ import { Poppins_300Light } from '@expo-google-fonts/poppins/300Light';
 import { Poppins_400Regular } from '@expo-google-fonts/poppins/400Regular';
 import { Poppins_500Medium } from '@expo-google-fonts/poppins/500Medium';
 import { Poppins_600SemiBold } from '@expo-google-fonts/poppins/600SemiBold';
+import { getDb } from './src/db/dbConfig';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { temaNavegacao } from './src/navigation/temaNavegacao';
 import { colors } from './src/view/styles/theme';
@@ -22,6 +24,16 @@ export default function App() {
     Poppins_500Medium,
     Poppins_600SemiBold,
   });
+
+  // Abre o banco e aplica as migrations uma vez, ao iniciar o app (seção 4.3).
+  // Se falhar, o app continua funcionando, porque o catálogo vem do código.
+  useEffect(() => {
+    try {
+      getDb();
+    } catch (erro) {
+      console.error('Não foi possível abrir o banco de dados:', erro);
+    }
+  }, []);
 
   // Enquanto as fontes carregam, mostra um indicador.
   // Se der erro, segue com a fonte do sistema em vez de travar o app.
