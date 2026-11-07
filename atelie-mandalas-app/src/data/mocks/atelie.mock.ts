@@ -4,7 +4,7 @@ import { Atelie } from '../../model/Atelie';
 export const ATELIE_MOCK: Atelie = {
   nome: 'Malu Mandalas',
   instagram: '@malu.mandalas',
-  whatsapp: '5500000000000', // TROCAR pelo WhatsApp do ateliê: 55 + DDD + número
+  whatsapp: '553287103005', // WhatsApp do ateliê, (32) 8710-3005: 55 + DDD + número, só dígitos
   slogan: 'mandalas artesanais em pontilhismo, criadas com delicadeza e significado.',
   boasVindas: 'é um prazer ter você aqui!',
   historia: {

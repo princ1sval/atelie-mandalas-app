@@ -17,8 +17,10 @@ function mostrarDiagnostico(banco: SQLite.SQLiteDatabase) {
   const journal = banco.getFirstSync<{ journal_mode: string }>('PRAGMA journal_mode');
   const chaves = banco.getFirstSync<{ foreign_keys: number }>('PRAGMA foreign_keys');
   const versao = banco.getFirstSync<{ user_version: number }>('PRAGMA user_version');
+  // Só a quantidade, sem nenhum dado dos pedidos. Ao reabrir o app, mostra que eles continuam lá.
+  const pedidos = banco.getFirstSync<{ total: number }>('SELECT COUNT(*) AS total FROM pedidos');
   console.log(
-    `journal_mode=${journal?.journal_mode} | foreign_keys=${chaves?.foreign_keys} | user_version=${versao?.user_version}`,
+    `journal_mode=${journal?.journal_mode} | foreign_keys=${chaves?.foreign_keys} | user_version=${versao?.user_version} | pedidos=${pedidos?.total}`,
   );
 }
 
