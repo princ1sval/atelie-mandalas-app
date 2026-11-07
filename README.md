@@ -42,7 +42,7 @@ Trabalho individual da disciplina **Programação para Dispositivos Móveis** (F
 ### Pré-requisitos
 - [Node.js](https://nodejs.org/) LTS (testado com a versão 24)
 - Git
-- Celular com o app **Expo Go** atualizado (compatível com o **SDK 57**)
+- Celular com o app **Expo Go** atualizado, compatível com o **SDK 58**. No iPhone só existe a versão mais recente do Expo Go: quando ela mudar de SDK, o projeto precisa ser atualizado junto
 - Uma conta gratuita na [Expo](https://expo.dev/signup), necessária para abrir o projeto no Expo Go do **iPhone**
 
 ### Passo a passo
@@ -63,7 +63,7 @@ npx expo start
 
 5. Leia o **QR code** que aparece no terminal:
    - **Android:** pelo próprio app Expo Go.
-   - **iPhone:** pela câmera. No iPhone, o Expo Go (SDK 57) exige login **na mesma conta Expo** no computador e no celular:
+   - **iPhone:** pela câmera. No iPhone, o Expo Go exige login **na mesma conta Expo** no computador e no celular:
      ```bash
      npx expo login
      ```
@@ -234,14 +234,14 @@ Tab.Navigator (raiz)
 
 | Biblioteca | Versão | Uso |
 |------------|--------|-----|
-| Expo (Managed Workflow) | SDK 57 | Base do projeto |
-| React Native | 0.86 | Interface nativa |
-| React | 19.2 | Componentes e hooks |
+| Expo (Managed Workflow) | SDK 58 | Base do projeto |
+| React Native | 0.88 | Interface nativa |
+| React | 19.3 | Componentes e hooks |
 | TypeScript | 6.0 | Tipagem |
 | @react-navigation/native, native-stack, bottom-tabs | 7.x | Navegação (Tab + Stack) |
-| react-native-screens / react-native-safe-area-context | 4.26 / 5.7 | Dependências da navegação e áreas seguras |
+| react-native-screens / react-native-safe-area-context | 4.30 / 5.11 | Dependências da navegação e áreas seguras |
 | @expo/vector-icons (Feather) | 15 | Ícones |
-| expo-font + @expo-google-fonts (Fraunces e Poppins) | 57 / 0.4 | Fontes da identidade visual |
+| expo-font + @expo-google-fonts (Fraunces e Poppins) | 58 / 0.4 | Fontes da identidade visual |
 
 Todas as bibliotecas foram instaladas com **`npx expo install`**, que escolhe a versão compatível com o SDK.
 
@@ -281,7 +281,7 @@ Services, ViewModels e telas continuam iguais. Os ViewModels já tratam **carreg
 
 | Requisito | Como foi atendido |
 |-----------|-------------------|
-| Expo Managed + TypeScript, commits progressivos | Template `blank-typescript` (SDK 57), um commit por etapa |
+| Expo Managed + TypeScript, commits progressivos | Template `blank-typescript` (criado no SDK 57 e atualizado para o 58), um commit por etapa |
 | Mínimo de 6 telas com propósito real | Início, Pronta entrega, Detalhe, Portfólio, Encomenda, Dúvidas |
 | Tab ou Drawer na raiz + Stack interno | Tab na raiz + Stacks de Pronta entrega e Portfólio |
 | Tela que recebe parâmetros e rotas tipadas | `DetalheMandala { mandalaId }` e `Encomendar { tema?, inspiracaoId? }`, em `navigation/types.ts` |
