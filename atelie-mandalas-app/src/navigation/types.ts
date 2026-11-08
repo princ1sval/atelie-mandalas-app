@@ -21,8 +21,11 @@ export type PortfolioStackParamList = {
   DetalheMandala: DetalheMandalaParams;
 };
 
-// Parâmetros opcionais do formulário: chegam pelo "Quero uma assim".
-export type EncomendaParams = { tema?: TemaEncomenda; inspiracaoId?: string };
+// Parâmetros opcionais do formulário.
+// tema e inspiracaoId chegam pelo "Quero uma assim".
+// limparEm chega do "Apagar meus dados": é a hora do pedido, um número novo a cada vez,
+// para o efeito que esvazia o formulário rodar de novo mesmo que já tenha rodado antes.
+export type EncomendaParams = { tema?: TemaEncomenda; inspiracaoId?: string; limparEm?: number };
 
 // Stack dentro da aba "Encomendar": o formulário e, por cima dele, o histórico.
 export type EncomendaStackParamList = {

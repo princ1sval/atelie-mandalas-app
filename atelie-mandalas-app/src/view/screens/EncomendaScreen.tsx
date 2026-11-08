@@ -10,8 +10,8 @@ import { TituloSecao } from '../components/TituloSecao';
 import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
 
 export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
-  // Parâmetros opcionais: chegam quando a pessoa vem do "Quero uma assim".
-  const vm = useEncomendaViewModel(route.params?.tema, route.params?.inspiracaoId);
+  // Parâmetros opcionais: chegam do "Quero uma assim" (tema e inspiração) ou do "Apagar meus dados" (limparEm).
+  const vm = useEncomendaViewModel(route.params?.tema, route.params?.inspiracaoId, route.params?.limparEm);
 
   // Limpar os parâmetros da rota permite receber a mesma inspiração de novo depois.
   function removerInspiracao() {

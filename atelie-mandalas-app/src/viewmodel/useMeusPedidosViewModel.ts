@@ -20,7 +20,10 @@ export interface MeusPedidosViewModel {
   pedidos: ItemPedido[];
   carregando: boolean;
   erro: string | null;
+  aviso: string | null; // aparece se excluir ou apagar falhar
   recarregar: () => void;
+  excluirPedido: (id: number) => Promise<void>;
+  apagarMeusDados: () => Promise<boolean>; // true quando deu certo
 }
 
 // Transforma o pedido salvo no texto de cada cartão.
@@ -47,6 +50,7 @@ export function useMeusPedidosViewModel(): MeusPedidosViewModel {
   const [pedidos, setPedidos] = useState<PedidoSalvo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -66,10 +70,37 @@ export function useMeusPedidosViewModel(): MeusPedidosViewModel {
     carregar();
   }, [carregar]);
 
+  // A confirmação acontece antes, na tela. Aqui só a exclusão em si.
+  async function excluirPedido(id: number) {
+    setAviso(null);
+    try {
+      await EncomendaService.excluirPedido(id);
+      // Tira o pedido da lista na hora, sem precisar ler o banco de novo.
+      setPedidos((atuais) => atuais.filter((pedido) => pedido.id !== id));
+    } catch {
+      setAviso('Não foi possível excluir o pedido. Tente novamente.');
+    }
+  }
+
+  async function apagarMeusDados(): Promise<boolean> {
+    setAviso(null);
+    try {
+      await EncomendaService.apagarMeusDados();
+      setPedidos([]);
+      return true;
+    } catch {
+      setAviso('Não foi possível apagar seus dados. Tente novamente.');
+      return false;
+    }
+  }
+
   return {
     pedidos: pedidos.map(paraItem),
     carregando,
     erro,
+    aviso,
     recarregar: carregar,
+    excluirPedido,
+    apagarMeusDados,
   };
 }

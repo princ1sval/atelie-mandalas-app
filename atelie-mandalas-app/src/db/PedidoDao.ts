@@ -89,4 +89,15 @@ export const PedidoDao = {
     const linhas = getDb().getAllSync<LinhaPedido>('SELECT * FROM pedidos ORDER BY id DESC');
     return linhas.map(paraPedidoSalvo);
   },
+
+  // Apaga um pedido pelo id, com "?" como nas outras consultas (seção 4.2).
+  excluir(id: number): void {
+    getDb().runSync('DELETE FROM pedidos WHERE id = ?', [id]);
+  },
+
+  // Apaga todo o histórico, como o DELETE da limpeza no logout (seção 9.2).
+  // Com AUTOINCREMENT, os próximos pedidos não reaproveitam os ids apagados.
+  excluirTodos(): void {
+    getDb().execSync('DELETE FROM pedidos');
+  },
 };

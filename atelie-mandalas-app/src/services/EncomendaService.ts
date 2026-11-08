@@ -105,6 +105,19 @@ function listarPedidos(): Promise<PedidoSalvo[]> {
   return encomendaRepository.listar();
 }
 
+// A cliente pode apagar um pedido do histórico a qualquer momento (seção 7.3).
+function excluirPedido(id: number): Promise<void> {
+  return encomendaRepository.excluir(id);
+}
+
+// "Apagar meus dados": tudo o que o app guardou sobre a cliente neste aparelho (seção 7.3).
+// O rascunho vai primeiro porque tem nome e WhatsApp, a mesma lógica da 9.4 de limpar o mais
+// sensível antes. O catálogo fica: ele é do app, não da cliente (seção 9.3).
+async function apagarMeusDados(): Promise<void> {
+  await rascunhoRepository.limpar();
+  await encomendaRepository.excluirTodos();
+}
+
 // ---------- Rascunho do formulário (seção 3.1) ----------
 
 // Formulário igual ao inicial: não há nada para guardar.
@@ -163,6 +176,8 @@ export const EncomendaService = {
   temErros,
   enviar,
   listarPedidos,
+  excluirPedido,
+  apagarMeusDados,
   carregarRascunho,
   salvarRascunho,
 };

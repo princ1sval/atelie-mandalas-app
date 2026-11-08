@@ -6,6 +6,8 @@ export interface EncomendaRepository {
   // A estimativa vem pronta do Service: calcular preço e prazo é regra de negócio.
   enviar(pedido: PedidoEncomenda, estimativa: EstimativaEncomenda): Promise<ConfirmacaoPedido>;
   listar(): Promise<PedidoSalvo[]>;
+  excluir(id: number): Promise<void>;
+  excluirTodos(): Promise<void>;
 }
 
 // O envio continua simulado: o app não tem API, então o pedido não chega à Malu.
@@ -51,5 +53,13 @@ export const encomendaRepository: EncomendaRepository = {
   // é por isso que a lista aparece na hora (seção 2.4: o banco local é o que a tela mostra).
   async listar() {
     return PedidoDao.listarTodos();
+  },
+
+  async excluir(id) {
+    PedidoDao.excluir(id);
+  },
+
+  async excluirTodos() {
+    PedidoDao.excluirTodos();
   },
 };

@@ -39,6 +39,7 @@ const OPCOES_TEMA: OpcaoTema[] = (Object.keys(NOMES_TEMA) as TemaEncomenda[]).ma
 export function useEncomendaViewModel(
   temaRecebido?: TemaEncomenda,
   inspiracaoIdRecebida?: string,
+  limparEmRecebido?: number,
 ): EncomendaViewModel {
   const [pedido, setPedido] = useState<PedidoEncomenda>(() =>
     EncomendaService.criarPedidoInicial(temaRecebido, inspiracaoIdRecebida),
@@ -58,6 +59,17 @@ export function useEncomendaViewModel(
       inspiracaoId: inspiracaoIdRecebida,
     }));
   }, [temaRecebido, inspiracaoIdRecebida]);
+
+  // "Apagar meus dados", em Meus pedidos, volta para cá com limparEm. O formulário ficou na memória,
+  // embaixo na pilha: sem esvaziá-lo, ele ainda mostraria os dados apagados, e a próxima
+  // alteração os gravaria de novo no rascunho.
+  useEffect(() => {
+    if (limparEmRecebido === undefined) return;
+    setPedido(EncomendaService.criarPedidoInicial());
+    setTentouEnviar(false);
+    setErroEnvio(null);
+    setProtocolo(null);
+  }, [limparEmRecebido]);
 
   // Ao abrir, lê o rascunho salvo (seção 3.1).
   useEffect(() => {
