@@ -66,7 +66,9 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
             <BotaoPrimario
               titulo="Ver pronta entrega"
               variante="cheioClaro"
-              onPress={() => navigation.navigate('ProntaEntregaTab', { screen: 'ProntaEntrega' })}
+              // pop: volta à lista que já existe, mesmo com um Detalhe aberto por cima.
+              // Sem ele, o React Navigation 7 empilharia uma segunda lista.
+              onPress={() => navigation.navigate('ProntaEntregaTab', { screen: 'ProntaEntrega', pop: true })}
             />
             <BotaoPrimario
               titulo="Encomendar a sua"
@@ -120,7 +122,8 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
             <Text style={styles.tituloTecnica}>{atelie.tecnica.titulo}</Text>
             <Text style={typography.pequeno}>{atelie.tecnica.texto}</Text>
             <Pressable
-              onPress={() => navigation.navigate('PortfolioTab', { screen: 'Portfolio' })}
+              // pop: volta à lista do Portfólio, como no "Ver pronta entrega" acima.
+              onPress={() => navigation.navigate('PortfolioTab', { screen: 'Portfolio', pop: true })}
               accessibilityRole="link"
               hitSlop={8}
             >
