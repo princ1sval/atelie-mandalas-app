@@ -1,10 +1,11 @@
-import { ConfirmacaoPedido, EstimativaEncomenda, PedidoEncomenda } from '../../model/Encomenda';
+import { ConfirmacaoPedido, EstimativaEncomenda, PedidoEncomenda, PedidoSalvo } from '../../model/Encomenda';
 import { PedidoDao } from '../../db/PedidoDao';
 import { esperar } from '../../utils/esperar';
 
 export interface EncomendaRepository {
   // A estimativa vem pronta do Service: calcular preço e prazo é regra de negócio.
   enviar(pedido: PedidoEncomenda, estimativa: EstimativaEncomenda): Promise<ConfirmacaoPedido>;
+  listar(): Promise<PedidoSalvo[]>;
 }
 
 // O envio continua simulado: o app não tem API, então o pedido não chega à Malu.
@@ -37,12 +38,18 @@ export const encomendaRepository: EncomendaRepository = {
     // pessoais: só a quantidade e a estimativa do último pedido. Sai na Etapa 7.
     if (__DEV__) {
       const pedidos = PedidoDao.listarTodos(); // o mais novo vem primeiro
-      const ultimo = pedidos[0];
+      const ultima = pedidos[0].estimativa;
       console.log(
-        `Pedidos no banco: ${pedidos.length} | último: R$ ${ultimo.precoMinimo} a R$ ${ultimo.precoMaximo}, ${ultimo.prazoDias} dias`,
+        `Pedidos no banco: ${pedidos.length} | último: R$ ${ultima?.precoMinimo} a R$ ${ultima?.precoMaximo}, ${ultima?.prazoDias} dias`,
       );
     }
 
     return { protocolo };
+  },
+
+  // O histórico mora no aparelho, então não há espera de rede para imitar:
+  // é por isso que a lista aparece na hora (seção 2.4: o banco local é o que a tela mostra).
+  async listar() {
+    return PedidoDao.listarTodos();
   },
 };

@@ -21,12 +21,21 @@ export type PortfolioStackParamList = {
   DetalheMandala: DetalheMandalaParams;
 };
 
+// Parâmetros opcionais do formulário: chegam pelo "Quero uma assim".
+export type EncomendaParams = { tema?: TemaEncomenda; inspiracaoId?: string };
+
+// Stack dentro da aba "Encomendar": o formulário e, por cima dele, o histórico.
+export type EncomendaStackParamList = {
+  Encomenda: EncomendaParams | undefined;
+  MeusPedidos: undefined;
+};
+
 // Abas: o navegador da raiz do app
 export type RootTabParamList = {
   Inicio: undefined;
   ProntaEntregaTab: NavigatorScreenParams<ProntaEntregaStackParamList> | undefined;
   PortfolioTab: NavigatorScreenParams<PortfolioStackParamList> | undefined;
-  Encomendar: { tema?: TemaEncomenda; inspiracaoId?: string } | undefined;
+  Encomendar: NavigatorScreenParams<EncomendaStackParamList> | undefined;
   Duvidas: undefined;
 };
 
@@ -34,7 +43,6 @@ export type RootTabParamList = {
 
 // Telas que ficam direto numa aba
 export type InicioScreenProps = BottomTabScreenProps<RootTabParamList, 'Inicio'>;
-export type EncomendaScreenProps = BottomTabScreenProps<RootTabParamList, 'Encomendar'>;
 export type FaqScreenProps = BottomTabScreenProps<RootTabParamList, 'Duvidas'>;
 
 // Telas dentro de um Stack que está dentro de uma aba:
@@ -46,6 +54,16 @@ export type ProntaEntregaScreenProps = CompositeScreenProps<
 
 export type PortfolioScreenProps = CompositeScreenProps<
   NativeStackScreenProps<PortfolioStackParamList, 'Portfolio'>,
+  BottomTabScreenProps<RootTabParamList>
+>;
+
+export type EncomendaScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<EncomendaStackParamList, 'Encomenda'>,
+  BottomTabScreenProps<RootTabParamList>
+>;
+
+export type MeusPedidosScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<EncomendaStackParamList, 'MeusPedidos'>,
   BottomTabScreenProps<RootTabParamList>
 >;
 

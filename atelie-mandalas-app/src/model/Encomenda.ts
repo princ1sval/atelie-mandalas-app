@@ -27,3 +27,18 @@ export interface EstimativaEncomenda {
 export interface ConfirmacaoPedido {
   protocolo: string;
 }
+
+// Um pedido do histórico, lido do banco do aparelho.
+// Não tem nome nem WhatsApp: eles não são guardados (seção 7.3).
+export interface PedidoSalvo {
+  id: number;
+  protocolo: string;
+  tema: TemaEncomenda;
+  tamanhoCm: TamanhoEncomenda;
+  cores: string;
+  ideia: string;
+  presente: boolean;
+  inspiracaoId: string | null;
+  criadoEm: string; // "AAAA-MM-DD HH:MM:SS", na hora do aparelho
+  estimativa: EstimativaEncomenda | null; // null nos pedidos feitos antes da migration 2
+}

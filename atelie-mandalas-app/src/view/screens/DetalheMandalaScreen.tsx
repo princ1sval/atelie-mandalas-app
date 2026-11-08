@@ -19,9 +19,11 @@ const ICONE_ACAO: Record<AcaoDetalhe['tipo'], NomeIcone> = {
 export function DetalheMandalaScreen({ route, navigation }: DetalheMandalaScreenProps) {
   const { mandalaId } = route.params;
 
-  // A tela entrega ao ViewModel "o que fazer" no Quero uma assim: navegar para a aba Encomendar.
+  // A tela entrega ao ViewModel "o que fazer" no Quero uma assim: abrir o formulário na aba Encomendar.
+  // pop: true volta ao formulário que já está na pilha, mesmo que Meus pedidos esteja aberto por cima.
+  // Sem ele, o React Navigation 7 empilharia um segundo formulário.
   const vm = useDetalheMandalaViewModel(mandalaId, (tema, inspiracaoId) =>
-    navigation.navigate('Encomendar', { tema, inspiracaoId }),
+    navigation.navigate('Encomendar', { screen: 'Encomenda', params: { tema, inspiracaoId }, pop: true }),
   );
 
   // Coloca o botão de compartilhar no cabeçalho depois que a mandala carregar.

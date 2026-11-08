@@ -24,6 +24,12 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
     navigation.setParams({ tema: undefined, inspiracaoId: undefined });
   }
 
+  // Na confirmação: limpa o formulário, como "Fazer outro pedido", e abre o histórico.
+  function verMeusPedidos() {
+    fazerOutroPedido();
+    navigation.navigate('MeusPedidos');
+  }
+
   function enviar() {
     Keyboard.dismiss(); // fecha o teclado antes de enviar
     vm.enviar();
@@ -44,6 +50,16 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
           titulo="Encomende a sua"
           descricao="Conte sua ideia e a Malu transforma em pontos."
         />
+
+        <Pressable
+          onPress={() => navigation.navigate('MeusPedidos')}
+          hitSlop={8}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.linkPedidos, pressed && styles.pressionado]}
+        >
+          <Feather name="clock" size={16} color={colors.primariaEscura} />
+          <Text style={styles.textoLink}>Meus pedidos</Text>
+        </Pressable>
 
         {vm.inspiracao ? (
           <View style={styles.inspiracao}>
@@ -175,6 +191,13 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
               Protocolo {vm.protocolo}. A Malu vai falar com você pelo WhatsApp para combinar os detalhes.
             </Text>
             <BotaoPrimario titulo="Fazer outro pedido" onPress={fazerOutroPedido} style={styles.botaoModal} />
+            <BotaoPrimario
+              titulo="Ver meus pedidos"
+              variante="contorno"
+              icone="clock"
+              onPress={verMeusPedidos}
+              style={styles.botaoModal}
+            />
           </View>
         </View>
       </Modal>
@@ -185,6 +208,9 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: colors.fundo },
   conteudo: { ...larguraMaxima, gap: spacing.lg, padding: spacing.lg, paddingBottom: spacing.xxl },
+  linkPedidos: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: spacing.sm },
+  textoLink: { fontFamily: fonts.corpoForte, fontSize: fontSizes.pequeno, color: colors.primariaEscura },
+  pressionado: { opacity: 0.7 },
   inspiracao: {
     flexDirection: 'row',
     alignItems: 'center',

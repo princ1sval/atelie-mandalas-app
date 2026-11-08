@@ -3,6 +3,7 @@ import {
   ErrosPedido,
   EstimativaEncomenda,
   PedidoEncomenda,
+  PedidoSalvo,
   TamanhoEncomenda,
 } from '../model/Encomenda';
 import { TemaEncomenda } from '../model/Mandala';
@@ -88,10 +89,16 @@ async function enviar(pedido: PedidoEncomenda): Promise<ConfirmacaoPedido> {
   );
 }
 
+// Histórico de pedidos deste aparelho, do mais novo para o mais antigo.
+function listarPedidos(): Promise<PedidoSalvo[]> {
+  return encomendaRepository.listar();
+}
+
 export const EncomendaService = {
   criarPedidoInicial,
   estimar,
   validar,
   temErros,
   enviar,
+  listarPedidos,
 };

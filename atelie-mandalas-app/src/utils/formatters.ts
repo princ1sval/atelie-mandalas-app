@@ -30,6 +30,15 @@ export function formatarTelefone(texto: string): string {
 }
 
 
+// "2026-11-08 09:20:48", como o SQLite grava -> "08/11/2026 às 09:20"
+// Feito só com texto, sem new Date(): a data já está na hora do aparelho,
+// e converter para Date poderia aplicar o fuso de novo.
+export function formatarDataHora(dataHora: string): string {
+  const [data, hora = ''] = dataHora.split(' ');
+  const [ano, mes, dia] = data.split('-');
+  return `${dia}/${mes}/${ano} às ${hora.slice(0, 5)}`;
+}
+
 // (1, 'peça', 'peças') -> "1 peça"   |   (6, 'peça', 'peças') -> "6 peças"
 export function formatarQuantidade(quantidade: number, singular: string, plural: string): string {
   return `${quantidade} ${quantidade === 1 ? singular : plural}`;

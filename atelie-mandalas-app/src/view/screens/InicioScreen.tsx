@@ -71,7 +71,9 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
             <BotaoPrimario
               titulo="Encomendar a sua"
               variante="contornoClaro"
-              onPress={() => navigation.navigate('Encomendar')}
+              // Abre o formulário mesmo que a aba esteja em Meus pedidos (pop),
+              // sem apagar o que já estava nele, como a inspiração da peça (merge).
+              onPress={() => navigation.navigate('Encomendar', { screen: 'Encomenda', pop: true, merge: true })}
             />
           </View>
         </View>

@@ -4,8 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootTabParamList } from './types';
 import { ProntaEntregaStack } from './ProntaEntregaStack';
 import { PortfolioStack } from './PortfolioStack';
+import { EncomendaStack } from './EncomendaStack';
 import { InicioScreen } from '../view/screens/InicioScreen';
-import { EncomendaScreen } from '../view/screens/EncomendaScreen';
 import { FaqScreen } from '../view/screens/FaqScreen';
 import { colors, fonts, radius } from '../view/styles/theme';
 import { NomeIcone } from '../view/styles/icons';
@@ -21,7 +21,7 @@ const ICONES: Record<keyof RootTabParamList, NomeIcone> = {
   Duvidas: 'help-circle',
 };
 
-// Navegador RAIZ: abas embaixo. Duas delas têm um Stack dentro.
+// Navegador RAIZ: abas embaixo. Três delas têm um Stack dentro.
 export function AppNavigator() {
   return (
     <Tab.Navigator
@@ -43,7 +43,7 @@ export function AppNavigator() {
       <Tab.Screen name="Inicio" component={InicioScreen} options={{ title: 'Início' }} />
       <Tab.Screen name="ProntaEntregaTab" component={ProntaEntregaStack} options={{ title: 'Pronta entrega' }} />
       <Tab.Screen name="PortfolioTab" component={PortfolioStack} options={{ title: 'Portfólio' }} />
-      <Tab.Screen name="Encomendar" component={EncomendaScreen} options={{ title: 'Encomendar' }} />
+      <Tab.Screen name="Encomendar" component={EncomendaStack} options={{ title: 'Encomendar' }} />
       <Tab.Screen name="Duvidas" component={FaqScreen} options={{ title: 'Dúvidas' }} />
     </Tab.Navigator>
   );

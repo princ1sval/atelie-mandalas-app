@@ -1,4 +1,4 @@
-import { EstimativaEncomenda, TamanhoEncomenda } from '../model/Encomenda';
+import { EstimativaEncomenda, PedidoSalvo, TamanhoEncomenda } from '../model/Encomenda';
 import { TemaEncomenda } from '../model/Mandala';
 import { getDb } from './dbConfig';
 
@@ -19,7 +19,8 @@ export interface PedidoParaSalvar {
 }
 
 // Uma linha da tabela pedidos, do jeito que o SQLite devolve.
-export interface LinhaPedido {
+// Só o DAO conhece esse formato: o resto do app recebe PedidoSalvo.
+interface LinhaPedido {
   id: number;
   protocolo: string;
   tema: string;
@@ -33,6 +34,29 @@ export interface LinhaPedido {
   precoMinimo: number | null;
   precoMaximo: number | null;
   prazoDias: number | null;
+}
+
+// Converte a linha do banco para o tipo do app: o caminho inverso do que o inserir faz.
+function paraPedidoSalvo(linha: LinhaPedido): PedidoSalvo {
+  const { precoMinimo, precoMaximo, prazoDias } = linha;
+  return {
+    id: linha.id,
+    protocolo: linha.protocolo,
+    // O banco guarda texto e número. Os valores vieram do próprio app, já validados,
+    // então dá para tratá-los como os tipos do app.
+    tema: linha.tema as TemaEncomenda,
+    tamanhoCm: linha.tamanhoCm as TamanhoEncomenda,
+    cores: linha.cores,
+    ideia: linha.ideia,
+    presente: linha.presente === 1, // 0/1 do SQLite volta a ser true/false (seção 4.2)
+    inspiracaoId: linha.inspiracaoId,
+    criadoEm: linha.criadoEm,
+    // Pedido de antes da migration 2: sem estimativa.
+    estimativa:
+      precoMinimo !== null && precoMaximo !== null && prazoDias !== null
+        ? { precoMinimo, precoMaximo, prazoDias }
+        : null,
+  };
 }
 
 export const PedidoDao = {
@@ -61,7 +85,8 @@ export const PedidoDao = {
 
   // Do mais novo para o mais antigo. A seção 4.2 ordena pela data, mas dois pedidos
   // no mesmo segundo teriam o mesmo criadoEm. O id nunca se repete e sempre cresce.
-  listarTodos(): LinhaPedido[] {
-    return getDb().getAllSync<LinhaPedido>('SELECT * FROM pedidos ORDER BY id DESC');
+  listarTodos(): PedidoSalvo[] {
+    const linhas = getDb().getAllSync<LinhaPedido>('SELECT * FROM pedidos ORDER BY id DESC');
+    return linhas.map(paraPedidoSalvo);
   },
 };
