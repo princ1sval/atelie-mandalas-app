@@ -6,13 +6,15 @@ import {
   PedidoSalvo,
   TamanhoEncomenda,
 } from '../model/Encomenda';
-import { TemaEncomenda } from '../model/Mandala';
+import { NOMES_TEMA, TemaEncomenda } from '../model/Mandala';
 import { encomendaRepository } from '../data/repositories/EncomendaRepository';
+import { rascunhoRepository } from '../data/repositories/RascunhoRepository';
 import { apenasDigitos } from '../utils/texto';
 import { ehTelefoneValido } from '../utils/validators';
 
 export const TAMANHOS_ENCOMENDA: TamanhoEncomenda[] = [20, 30, 40];
 export const LIMITE_IDEIA = 500;
+const TEMAS = Object.keys(NOMES_TEMA) as TemaEncomenda[];
 
 // Tabela de preço e prazo por tamanho (valores provisórios: confirmar com a Malu).
 const TABELA_POR_TAMANHO: Record<TamanhoEncomenda, EstimativaEncomenda> = {
@@ -79,7 +81,7 @@ async function enviar(pedido: PedidoEncomenda): Promise<ConfirmacaoPedido> {
   // Limpa os dados antes de mandar para a camada de dados.
   // A estimativa vai junto: a tabela de preços é provisória e pode mudar, e o histórico
   // precisa guardar o valor que a cliente viu na tela, e não o da tabela de amanhã.
-  return encomendaRepository.enviar(
+  const confirmacao = await encomendaRepository.enviar(
     {
       ...pedido,
       nome: pedido.nome.trim(),
@@ -87,11 +89,71 @@ async function enviar(pedido: PedidoEncomenda): Promise<ConfirmacaoPedido> {
     },
     estimar(pedido),
   );
+
+  // Pedido enviado: o rascunho, com nome e WhatsApp, já não serve para nada (seção 7.3).
+  // Se apagar falhar, o envio continua valendo: o formulário vazio apaga a chave no próximo salvamento.
+  try {
+    await rascunhoRepository.limpar();
+  } catch {
+    // ver o comentário acima
+  }
+  return confirmacao;
 }
 
 // Histórico de pedidos deste aparelho, do mais novo para o mais antigo.
 function listarPedidos(): Promise<PedidoSalvo[]> {
   return encomendaRepository.listar();
+}
+
+// ---------- Rascunho do formulário (seção 3.1) ----------
+
+// Formulário igual ao inicial: não há nada para guardar.
+function estaVazio(pedido: PedidoEncomenda): boolean {
+  const inicial = criarPedidoInicial();
+  return (
+    pedido.nome.trim() === '' &&
+    pedido.whatsapp.trim() === '' &&
+    pedido.tema === inicial.tema &&
+    pedido.tamanhoCm === inicial.tamanhoCm &&
+    pedido.cores.trim() === '' &&
+    pedido.ideia.trim() === '' &&
+    pedido.presente === inicial.presente &&
+    !pedido.inspiracaoId
+  );
+}
+
+// O rascunho vem do armazenamento do aparelho, então cada campo é conferido antes de voltar ao
+// formulário. Um valor estranho, como um tamanho que não existe, volta ao padrão em vez de quebrar a tela.
+function restaurarRascunho(salvo: Partial<PedidoEncomenda>): PedidoEncomenda {
+  const inicial = criarPedidoInicial();
+  const texto = (valor: unknown, padrao: string) => (typeof valor === 'string' ? valor : padrao);
+  return {
+    nome: texto(salvo.nome, inicial.nome),
+    whatsapp: texto(salvo.whatsapp, inicial.whatsapp),
+    tema: TEMAS.includes(salvo.tema as TemaEncomenda) ? (salvo.tema as TemaEncomenda) : inicial.tema,
+    tamanhoCm: TAMANHOS_ENCOMENDA.includes(salvo.tamanhoCm as TamanhoEncomenda)
+      ? (salvo.tamanhoCm as TamanhoEncomenda)
+      : inicial.tamanhoCm,
+    cores: texto(salvo.cores, inicial.cores),
+    ideia: texto(salvo.ideia, inicial.ideia),
+    presente: salvo.presente === true,
+    inspiracaoId: typeof salvo.inspiracaoId === 'string' ? salvo.inspiracaoId : undefined,
+  };
+}
+
+// O rascunho salvo, já conferido, ou null quando não há nenhum.
+async function carregarRascunho(): Promise<PedidoEncomenda | null> {
+  const salvo = await rascunhoRepository.carregar();
+  return salvo ? restaurarRascunho(salvo) : null;
+}
+
+// Guarda o formulário. Se ele estiver vazio, apaga a chave: nada de guardar dado à toa (seção 7.3).
+async function salvarRascunho(pedido: PedidoEncomenda): Promise<void> {
+  if (estaVazio(pedido)) {
+    await rascunhoRepository.limpar();
+  } else {
+    await rascunhoRepository.salvar(pedido);
+  }
 }
 
 export const EncomendaService = {
@@ -101,4 +163,6 @@ export const EncomendaService = {
   temErros,
   enviar,
   listarPedidos,
+  carregarRascunho,
+  salvarRascunho,
 };

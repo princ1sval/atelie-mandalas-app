@@ -48,6 +48,7 @@ export function useEncomendaViewModel(
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
+  const [rascunhoPronto, setRascunhoPronto] = useState(false); // vira true depois de ler o rascunho salvo
 
   // A aba fica montada: quando chegam parâmetros novos ("Quero uma assim"), atualiza o pedido.
   useEffect(() => {
@@ -57,6 +58,47 @@ export function useEncomendaViewModel(
       inspiracaoId: inspiracaoIdRecebida,
     }));
   }, [temaRecebido, inspiracaoIdRecebida]);
+
+  // Ao abrir, lê o rascunho salvo (seção 3.1).
+  useEffect(() => {
+    let ativo = true; // se a tela fechar antes de a leitura terminar, a resposta é ignorada
+    async function lerRascunho() {
+      try {
+        const rascunho = await EncomendaService.carregarRascunho();
+        if (ativo && rascunho) {
+          setPedido((atual) => ({
+            ...rascunho,
+            // Tema e inspiração que chegaram pelo "Quero uma assim" valem mais que os do rascunho:
+            // a cliente acabou de escolher a peça.
+            tema: atual.tema ?? rascunho.tema,
+            inspiracaoId: atual.inspiracaoId ?? rascunho.inspiracaoId,
+          }));
+        }
+      } catch {
+        // Não deu para ler o rascunho: o formulário só começa vazio.
+      } finally {
+        // Só agora o salvamento pode começar. Antes disso, o formulário ainda vazio apagaria o rascunho.
+        if (ativo) setRascunhoPronto(true);
+      }
+    }
+    lerRascunho();
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  // Salva o rascunho 500 ms depois da última alteração, e não a cada letra digitada.
+  // Cada alteração cancela a espera anterior: é o clearTimeout do return.
+  useEffect(() => {
+    // Não salva antes de ler o rascunho, durante o envio nem com a confirmação aberta.
+    if (!rascunhoPronto || enviando || protocolo !== null) return;
+    const espera = setTimeout(() => {
+      EncomendaService.salvarRascunho(pedido).catch(() => {
+        // Se falhar, a cliente só perde a conveniência do rascunho.
+      });
+    }, 500);
+    return () => clearTimeout(espera);
+  }, [pedido, rascunhoPronto, enviando, protocolo]);
 
   // Busca a mandala que inspirou o pedido sempre que o id mudar.
   useEffect(() => {
@@ -92,8 +134,9 @@ export function useEncomendaViewModel(
     setErroEnvio(null);
     if (EncomendaService.temErros(EncomendaService.validar(pedido))) return;
 
-    setEnviando(true);
+    setEnviando(true); // também pausa o salvamento do rascunho
     try {
+      // Quando o envio dá certo, o Service apaga o rascunho.
       const confirmacao = await EncomendaService.enviar(pedido);
       setProtocolo(confirmacao.protocolo);
     } catch {
