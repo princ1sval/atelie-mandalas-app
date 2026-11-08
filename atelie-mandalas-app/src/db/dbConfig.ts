@@ -12,18 +12,6 @@ function configurarDb(banco: SQLite.SQLiteDatabase) {
   banco.execSync('PRAGMA synchronous = NORMAL'); // equilíbrio entre segurança e velocidade
 }
 
-// TEMPORÁRIO: mostra no terminal como o banco está, para testar as etapas. Sai na Etapa 7.
-function mostrarDiagnostico(banco: SQLite.SQLiteDatabase) {
-  const journal = banco.getFirstSync<{ journal_mode: string }>('PRAGMA journal_mode');
-  const chaves = banco.getFirstSync<{ foreign_keys: number }>('PRAGMA foreign_keys');
-  const versao = banco.getFirstSync<{ user_version: number }>('PRAGMA user_version');
-  // Só a quantidade, sem nenhum dado dos pedidos. Ao reabrir o app, mostra que eles continuam lá.
-  const pedidos = banco.getFirstSync<{ total: number }>('SELECT COUNT(*) AS total FROM pedidos');
-  console.log(
-    `journal_mode=${journal?.journal_mode} | foreign_keys=${chaves?.foreign_keys} | user_version=${versao?.user_version} | pedidos=${pedidos?.total}`,
-  );
-}
-
 export function getDb(): SQLite.SQLiteDatabase {
   if (!db) {
     const novoBanco = SQLite.openDatabaseSync('malu-mandalas.db'); // cria o arquivo se ainda não existir
@@ -32,8 +20,6 @@ export function getDb(): SQLite.SQLiteDatabase {
     // e dentro de uma transação esses PRAGMAs não têm efeito.
     configurarDb(novoBanco);
     executarMigrations(novoBanco);
-
-    if (__DEV__) mostrarDiagnostico(novoBanco);
 
     // Só guarda a conexão depois que tudo deu certo.
     // Assim, se uma migration falhar, a próxima chamada tenta de novo em vez de usar um banco sem migrar.

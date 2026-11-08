@@ -36,16 +36,6 @@ export const encomendaRepository: EncomendaRepository = {
       estimativa,
     });
 
-    // TEMPORÁRIO: confirma no terminal o que foi gravado, lendo de volta do banco e sem dados
-    // pessoais: só a quantidade e a estimativa do último pedido. Sai na Etapa 7.
-    if (__DEV__) {
-      const pedidos = PedidoDao.listarTodos(); // o mais novo vem primeiro
-      const ultima = pedidos[0].estimativa;
-      console.log(
-        `Pedidos no banco: ${pedidos.length} | último: R$ ${ultima?.precoMinimo} a R$ ${ultima?.precoMaximo}, ${ultima?.prazoDias} dias`,
-      );
-    }
-
     return { protocolo };
   },
 
