@@ -76,11 +76,16 @@ async function enviar(pedido: PedidoEncomenda): Promise<ConfirmacaoPedido> {
     throw new Error('Pedido inválido: confira os campos destacados.');
   }
   // Limpa os dados antes de mandar para a camada de dados.
-  return encomendaRepository.enviar({
-    ...pedido,
-    nome: pedido.nome.trim(),
-    whatsapp: apenasDigitos(pedido.whatsapp),
-  });
+  // A estimativa vai junto: a tabela de preços é provisória e pode mudar, e o histórico
+  // precisa guardar o valor que a cliente viu na tela, e não o da tabela de amanhã.
+  return encomendaRepository.enviar(
+    {
+      ...pedido,
+      nome: pedido.nome.trim(),
+      whatsapp: apenasDigitos(pedido.whatsapp),
+    },
+    estimar(pedido),
+  );
 }
 
 export const EncomendaService = {

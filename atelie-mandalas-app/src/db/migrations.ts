@@ -30,6 +30,21 @@ const migrations: Migration[] = [
       )
     `,
   },
+  {
+    versao: 2,
+    descricao: 'Guarda a estimativa de preço e prazo do pedido',
+    // ALTER TABLE acrescenta colunas sem apagar os pedidos que já estão no aparelho (seção 4.3).
+    // O SQLite aceita uma coluna por ALTER TABLE, por isso são três comandos. A transação de
+    // executarMigrations protege os três: se o terceiro falhar, os dois primeiros são desfeitos.
+    // Sem DEFAULT de propósito: nos pedidos antigos a estimativa fica NULL, ou seja, "não registrada".
+    // Um DEFAULT 0 diria que o pedido custou R$ 0.
+    // Valores em reais inteiros, como na tabela de preços do EncomendaService.
+    sql: `
+      ALTER TABLE pedidos ADD COLUMN precoMinimo INTEGER;
+      ALTER TABLE pedidos ADD COLUMN precoMaximo INTEGER;
+      ALTER TABLE pedidos ADD COLUMN prazoDias   INTEGER;
+    `,
+  },
 ];
 
 export function executarMigrations(db: SQLite.SQLiteDatabase) {
