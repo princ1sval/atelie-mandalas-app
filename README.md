@@ -298,7 +298,7 @@ Services, ViewModels e telas continuam iguais. Os ViewModels já tratam **carreg
 ## Observações
 
 - As **imagens das mandalas** são ilustrações provisórias criadas para o protótipo. As fotos reais das peças do ateliê vão substituí-las mantendo os mesmos nomes de arquivo. Fotos de encomendas (pessoas, pets, homenagens) só entram com autorização dos clientes.
-- **Preços, prazos e o número de WhatsApp** são provisórios. O número fica em `src/data/mocks/atelie.mock.ts`.
+- **Preços e prazos** são provisórios. O WhatsApp do ateliê fica em `src/data/mocks/atelie.mock.ts`.
 - O envio de encomenda é **simulado**: o Repository gera um número de protocolo e guarda o pedido só na memória enquanto o app está aberto.
 
 ---
