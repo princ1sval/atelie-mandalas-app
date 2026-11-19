@@ -3,7 +3,9 @@ import { Perfil } from '../model/Perfil';
 import { ErrosPerfil, PerfilService } from '../services/PerfilService';
 import { ImagemService, ResultadoImagem } from '../services/ImagemService';
 import { LocalizacaoService, ResultadoLocalizacao } from '../services/LocalizacaoService';
+import { AuthService } from '../services/AuthService';
 import { formatarDistancia, formatarTelefone } from '../utils/formatters';
+import { useSessao } from './useSessao';
 
 export interface PerfilViewModel {
   perfil: Perfil; // como está na tela, ainda sem salvar
@@ -19,7 +21,10 @@ export interface PerfilViewModel {
   salvando: boolean;
   erroSalvar: string | null;
   salvoAgora: boolean; // mostra "Perfil salvo" até a próxima alteração
+  emailDaConta: string | null; // e-mail de quem está logado
+  avisoConta: string | null; // se sair da conta falhar
   recarregar: () => void;
+  sairDaConta: () => void;
   alterarNome: (texto: string) => void;
   alterarWhatsapp: (texto: string) => void;
   alterarCidade: (texto: string) => void;
@@ -52,6 +57,8 @@ export function usePerfilViewModel(): PerfilViewModel {
   const [erroSalvar, setErroSalvar] = useState<string | null>(null);
   const [tentouSalvar, setTentouSalvar] = useState(false);
   const [salvoAgora, setSalvoAgora] = useState(false);
+  const { usuario } = useSessao();
+  const [avisoConta, setAvisoConta] = useState<string | null>(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -122,6 +129,17 @@ export function usePerfilViewModel(): PerfilViewModel {
     }
   }
 
+  // Sai da conta: o Firebase apaga a sessão do SecureStore, e a aba Perfil volta sozinha
+  // para a tela Entrar. Apagar também os dados do aparelho ao sair fica para a B6 (seção 9).
+  async function sairDaConta() {
+    setAvisoConta(null);
+    try {
+      await AuthService.sair();
+    } catch {
+      setAvisoConta('Não foi possível sair agora. Tente de novo.');
+    }
+  }
+
   async function salvar() {
     setTentouSalvar(true); // a partir daqui os erros aparecem
     setErroSalvar(null);
@@ -155,7 +173,10 @@ export function usePerfilViewModel(): PerfilViewModel {
     salvando,
     erroSalvar,
     salvoAgora,
+    emailDaConta: usuario?.email ?? null,
+    avisoConta,
     recarregar: carregar,
+    sairDaConta,
     alterarNome: (texto) => alterar({ nome: texto }),
     alterarWhatsapp: (texto) => alterar({ whatsapp: formatarTelefone(texto) }), // máscara enquanto digita
     alterarCidade: (texto) => {

@@ -33,6 +33,13 @@ export type EncomendaStackParamList = {
   MeusPedidos: undefined;
 };
 
+// Stack dentro da aba "Perfil": sem login mostra Entrar e Cadastro; com login, o Perfil.
+export type PerfilStackParamList = {
+  Perfil: undefined;
+  Entrar: undefined;
+  Cadastro: undefined;
+};
+
 // Abas: o navegador da raiz do app
 export type RootTabParamList = {
   Inicio: undefined;
@@ -40,7 +47,7 @@ export type RootTabParamList = {
   PortfolioTab: NavigatorScreenParams<PortfolioStackParamList> | undefined;
   Encomendar: NavigatorScreenParams<EncomendaStackParamList> | undefined;
   Duvidas: undefined;
-  Perfil: undefined; // vira um Stack na B4, quando entrar o login
+  PerfilTab: NavigatorScreenParams<PerfilStackParamList> | undefined;
 };
 
 // ---------- PROPS DE CADA TELA (route + navigation já tipados) ----------
@@ -68,6 +75,16 @@ export type EncomendaScreenProps = CompositeScreenProps<
 
 export type MeusPedidosScreenProps = CompositeScreenProps<
   NativeStackScreenProps<EncomendaStackParamList, 'MeusPedidos'>,
+  BottomTabScreenProps<RootTabParamList>
+>;
+
+export type EntrarScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<PerfilStackParamList, 'Entrar'>,
+  BottomTabScreenProps<RootTabParamList>
+>;
+
+export type CadastroScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<PerfilStackParamList, 'Cadastro'>,
   BottomTabScreenProps<RootTabParamList>
 >;
 

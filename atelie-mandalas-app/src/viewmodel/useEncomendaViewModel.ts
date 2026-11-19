@@ -6,6 +6,7 @@ import { EncomendaService, LIMITE_IDEIA, TAMANHOS_ENCOMENDA } from '../services/
 import { MandalaService } from '../services/MandalaService';
 import { PerfilService } from '../services/PerfilService';
 import { formatarFaixaPreco, formatarTelefone } from '../utils/formatters';
+import { useSessao } from './useSessao';
 
 export interface OpcaoTema {
   valor: TemaEncomenda;
@@ -25,6 +26,7 @@ export interface EncomendaViewModel {
   enviando: boolean;
   mensagemFormulario: string | null; // aviso perto do botão de enviar
   protocolo: string | null; // preenchido quando o pedido é enviado
+  precisaEntrar: boolean; // tentou enviar sem estar logada: a tela mostra o convite para entrar
   atualizarCampo: <K extends keyof PedidoEncomenda>(campo: K, valor: PedidoEncomenda[K]) => void;
   alterarWhatsapp: (texto: string) => void;
   removerInspiracao: () => void;
@@ -53,6 +55,13 @@ export function useEncomendaViewModel(
   const [protocolo, setProtocolo] = useState<string | null>(null);
   const [rascunhoPronto, setRascunhoPronto] = useState(false); // vira true depois de ler o rascunho salvo
   const [perfil, setPerfil] = useState<Perfil>(PerfilService.criarPerfilVazio); // preenche nome e WhatsApp
+  const { usuario } = useSessao();
+  const [precisaEntrar, setPrecisaEntrar] = useState(false);
+
+  // Entrou na conta: o convite para entrar some.
+  useEffect(() => {
+    if (usuario) setPrecisaEntrar(false);
+  }, [usuario]);
 
   // A aba fica montada: quando chegam parâmetros novos ("Quero uma assim"), atualiza o pedido.
   useEffect(() => {
@@ -72,6 +81,7 @@ export function useEncomendaViewModel(
     setTentouEnviar(false);
     setErroEnvio(null);
     setProtocolo(null);
+    setPrecisaEntrar(false);
   }, [limparEmRecebido]);
 
   // Ao abrir, lê o rascunho salvo (seção 3.1) e depois o perfil, que preenche os campos vazios.
@@ -168,6 +178,13 @@ export function useEncomendaViewModel(
     setErroEnvio(null);
     if (EncomendaService.temErros(EncomendaService.validar(pedido))) return;
 
+    // O login só é pedido aqui, na hora de enviar: o catálogo continua aberto para todos.
+    // Enquanto a cliente entra, o formulário continua preenchido e guardado no rascunho.
+    if (!usuario) {
+      setPrecisaEntrar(true);
+      return;
+    }
+
     setEnviando(true); // também pausa o salvamento do rascunho
     try {
       // Quando o envio dá certo, o Service apaga o rascunho.
@@ -186,6 +203,7 @@ export function useEncomendaViewModel(
     setTentouEnviar(false);
     setErroEnvio(null);
     setProtocolo(null);
+    setPrecisaEntrar(false);
   }
 
   // ---------- Valores derivados (recalculados a cada mudança no pedido) ----------
@@ -214,6 +232,7 @@ export function useEncomendaViewModel(
     enviando,
     mensagemFormulario,
     protocolo,
+    precisaEntrar,
     atualizarCampo,
     alterarWhatsapp,
     removerInspiracao,

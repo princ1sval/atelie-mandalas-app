@@ -44,9 +44,10 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
         {/* ---------- TOPO (saudação do perfil e cartão verde de boas-vindas) ---------- */}
         <View style={styles.topo}>
           {vm.saudacao ? (
-            // Só aparece depois que a cliente salva o perfil. Tocar abre a aba Perfil.
+            // Só aparece depois que a cliente salva o perfil. Tocar abre a aba Perfil
+            // (sem login, ela mostra a tela Entrar).
             <Pressable
-              onPress={() => navigation.navigate('Perfil')}
+              onPress={() => navigation.navigate('PerfilTab')}
               accessibilityRole="button"
               accessibilityLabel={`${vm.saudacao.texto} Abrir meu perfil`}
               style={({ pressed }) => [styles.saudacao, pressed && styles.pressionado]}

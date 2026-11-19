@@ -32,6 +32,8 @@ yarn-error.*
 
 # local env files
 .env*.local
+# configuração do Firebase (o modelo, sem os valores, fica no .env.example)
+.env
 
 # typescript
 *.tsbuildinfo

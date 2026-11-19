@@ -7,6 +7,7 @@ import { CampoTexto } from '../components/CampoTexto';
 import { FotoPerfil } from '../components/FotoPerfil';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
+import { confirmar } from '../utils/confirmar';
 import { colors, fonts, fontSizes, larguraMaxima, spacing, typography } from '../styles/theme';
 
 // Perfil da cliente: nome, WhatsApp e foto, guardados só neste aparelho.
@@ -17,6 +18,16 @@ export function PerfilScreen() {
   function salvar() {
     Keyboard.dismiss(); // fecha o teclado antes de salvar
     vm.salvar();
+  }
+
+  // A confirmação fica na tela, como no "Apagar meus dados": é a tela que conversa com a pessoa.
+  async function sair() {
+    const confirmou = await confirmar(
+      'Sair da conta?',
+      'Para enviar encomendas, você vai precisar entrar de novo.',
+      'Sair',
+    );
+    if (confirmou) vm.sairDaConta();
   }
 
   if (vm.carregando || vm.erro) {
@@ -130,6 +141,15 @@ export function PerfilScreen() {
             O perfil fica só neste aparelho. Para apagá-lo, use "Apagar meus dados" em Pedidos › Meus pedidos.
           </Text>
         </View>
+
+        {/* Conta do Firebase: quem está logado e o botão de sair. */}
+        <View style={styles.conta}>
+          {vm.emailDaConta ? (
+            <Text style={[typography.pequeno, styles.centralizado]}>Conta: {vm.emailDaConta}</Text>
+          ) : null}
+          <BotaoPrimario titulo="Sair da conta" variante="contorno" icone="log-out" onPress={sair} />
+          {vm.avisoConta ? <Text style={[styles.erro, styles.centralizado]}>{vm.avisoConta}</Text> : null}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -146,6 +166,12 @@ const styles = StyleSheet.create({
   grupo: { gap: spacing.sm },
   distancia: { fontFamily: fonts.corpoForte, fontSize: fontSizes.pequeno, color: colors.primariaEscura },
   envio: { gap: spacing.sm },
+  conta: {
+    gap: spacing.sm,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.borda,
+  },
   erro: { ...typography.pequeno, color: colors.erro },
   sucesso: { ...typography.pequeno, fontFamily: fonts.corpoForte, color: colors.primariaEscura },
   centralizado: { textAlign: 'center' },

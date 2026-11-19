@@ -1,4 +1,16 @@
-import { Image, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import {
+  Image,
+  Keyboard,
+  Modal,
+  Pressable,
+  ScrollView,
+  ScrollViewInstance,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
 import { EncomendaScreenProps } from '../../navigation/types';
@@ -12,6 +24,12 @@ import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } 
 export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
   // Parâmetros opcionais: chegam do "Quero uma assim" (tema e inspiração) ou do "Apagar meus dados" (limparEm).
   const vm = useEncomendaViewModel(route.params?.tema, route.params?.inspiracaoId, route.params?.limparEm);
+  const rolagem = useRef<ScrollViewInstance>(null); // dá acesso ao scrollToEnd da ScrollView
+
+  // O convite para entrar aparece embaixo do botão de enviar: a tela rola até ele, para a cliente ver.
+  useEffect(() => {
+    if (vm.precisaEntrar) rolagem.current?.scrollToEnd({ animated: true });
+  }, [vm.precisaEntrar]);
 
   // Limpar os parâmetros da rota permite receber a mesma inspiração de novo depois.
   function removerInspiracao() {
@@ -38,6 +56,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
   return (
     <SafeAreaView style={styles.tela} edges={['top']}>
       <ScrollView
+        ref={rolagem}
         contentContainerStyle={styles.conteudo}
         automaticallyAdjustKeyboardInsets // iOS: rola até o campo focado
         keyboardShouldPersistTaps="handled"
@@ -178,6 +197,21 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
             <Text style={[styles.erro, styles.centralizado]}>{vm.mensagemFormulario}</Text>
           ) : null}
           <Text style={[typography.pequeno, styles.centralizado]}>Você recebe a confirmação pelo WhatsApp</Text>
+
+          {/* Login só na hora de enviar. A aba Perfil mostra Entrar e Criar conta para quem não entrou. */}
+          {vm.precisaEntrar ? (
+            <View style={styles.convite}>
+              <Text style={[typography.corpo, styles.centralizado]}>
+                Para enviar o pedido, entre na sua conta. O que você preencheu continua aqui.
+              </Text>
+              <BotaoPrimario
+                titulo="Entrar ou criar conta"
+                variante="contorno"
+                icone="log-in"
+                onPress={() => navigation.navigate('PerfilTab')}
+              />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -256,6 +290,15 @@ const styles = StyleSheet.create({
   faixaPreco: { fontFamily: fonts.titulo, fontSize: fontSizes.secao, color: colors.textoSobrePrimaria },
   prazo: { ...typography.pequeno, color: colors.textoSobrePrimaria },
   envio: { gap: spacing.sm },
+  convite: {
+    gap: spacing.md,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    backgroundColor: colors.superficie,
+    borderWidth: 1,
+    borderColor: colors.borda,
+    borderRadius: radius.lg,
+  },
   centralizado: { textAlign: 'center' },
   fundoModal: {
     flex: 1,
