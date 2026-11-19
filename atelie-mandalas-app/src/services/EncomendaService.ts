@@ -7,8 +7,10 @@ import {
   TamanhoEncomenda,
 } from '../model/Encomenda';
 import { NOMES_TEMA, TemaEncomenda } from '../model/Mandala';
+import { Perfil } from '../model/Perfil';
 import { encomendaRepository } from '../data/repositories/EncomendaRepository';
 import { rascunhoRepository } from '../data/repositories/RascunhoRepository';
+import { PerfilService } from './PerfilService';
 import { apenasDigitos } from '../utils/texto';
 import { ehTelefoneValido } from '../utils/validators';
 
@@ -111,11 +113,26 @@ function excluirPedido(id: number): Promise<void> {
 }
 
 // "Apagar meus dados": tudo o que o app guardou sobre a cliente neste aparelho (seção 7.3).
-// O rascunho vai primeiro porque tem nome e WhatsApp, a mesma lógica da 9.4 de limpar o mais
-// sensível antes. O catálogo fica: ele é do app, não da cliente (seção 9.3).
+// O rascunho e o perfil vão primeiro porque têm nome, WhatsApp e foto, a mesma lógica da 9.4
+// de limpar o mais sensível antes. O catálogo fica: ele é do app, não da cliente (seção 9.3).
 async function apagarMeusDados(): Promise<void> {
   await rascunhoRepository.limpar();
+  await PerfilService.apagar(); // o perfil e o arquivo da foto
   await encomendaRepository.excluirTodos();
+}
+
+// O formulário vem preenchido com o perfil, sem apagar o que a cliente digitou.
+// Um campo recebe o valor do perfil quando está vazio ou quando ainda mostra o valor antigo
+// do perfil (a cliente trocou o nome no Perfil e o formulário acompanha).
+function preencherComPerfil(pedido: PedidoEncomenda, perfil: Perfil, anterior?: Perfil): PedidoEncomenda {
+  const escolher = (noFormulario: string, doPerfil: string, antigo?: string) =>
+    noFormulario.trim() === '' || noFormulario === antigo ? doPerfil : noFormulario;
+
+  const nome = escolher(pedido.nome, perfil.nome, anterior?.nome);
+  const whatsapp = escolher(pedido.whatsapp, perfil.whatsapp, anterior?.whatsapp);
+  // Nada mudou: devolve o mesmo objeto, para a tela não redesenhar à toa.
+  if (nome === pedido.nome && whatsapp === pedido.whatsapp) return pedido;
+  return { ...pedido, nome, whatsapp };
 }
 
 // ---------- Rascunho do formulário (seção 3.1) ----------
@@ -160,12 +177,23 @@ async function carregarRascunho(): Promise<PedidoEncomenda | null> {
   return salvo ? restaurarRascunho(salvo) : null;
 }
 
-// Guarda o formulário. Se ele estiver vazio, apaga a chave: nada de guardar dado à toa (seção 7.3).
-async function salvarRascunho(pedido: PedidoEncomenda): Promise<void> {
-  if (estaVazio(pedido)) {
+// Nome e WhatsApp iguais aos do perfil já estão guardados no perfil: o rascunho não os repete
+// (seção 7.3, guardar só o necessário). Ao reabrir o app, eles voltam pelo preencherComPerfil.
+function semDadosDoPerfil(pedido: PedidoEncomenda, perfil: Perfil): PedidoEncomenda {
+  return {
+    ...pedido,
+    nome: pedido.nome === perfil.nome ? '' : pedido.nome,
+    whatsapp: pedido.whatsapp === perfil.whatsapp ? '' : pedido.whatsapp,
+  };
+}
+
+// Guarda o formulário. Se não sobrar nada para guardar, apaga a chave: nada de guardar dado à toa (seção 7.3).
+async function salvarRascunho(pedido: PedidoEncomenda, perfil: Perfil): Promise<void> {
+  const paraGuardar = semDadosDoPerfil(pedido, perfil);
+  if (estaVazio(paraGuardar)) {
     await rascunhoRepository.limpar();
   } else {
-    await rascunhoRepository.salvar(pedido);
+    await rascunhoRepository.salvar(paraGuardar);
   }
 }
 
@@ -178,6 +206,7 @@ export const EncomendaService = {
   listarPedidos,
   excluirPedido,
   apagarMeusDados,
+  preencherComPerfil,
   carregarRascunho,
   salvarRascunho,
 };

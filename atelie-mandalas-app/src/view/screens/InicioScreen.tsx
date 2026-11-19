@@ -4,6 +4,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { InicioScreenProps } from '../../navigation/types';
 import { useInicioViewModel } from '../../viewmodel/useInicioViewModel';
 import { BotaoPrimario } from '../components/BotaoPrimario';
+import { FotoPerfil } from '../components/FotoPerfil';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
 import { colors, fonts, fontSizes, larguraMaxima, radius, spacing, typography } from '../styles/theme';
@@ -40,43 +41,58 @@ export function InicioScreen({ navigation }: InicioScreenProps) {
   return (
     <SafeAreaView style={styles.tela} edges={['top']}>
       <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
-        {/* ---------- TOPO (cartão verde de boas-vindas) ---------- */}
-        <View style={styles.hero}>
-          <Image
-            source={IMAGEM_DECORATIVA}
-            style={styles.mandalaDecorativa}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          />
-          <Text style={styles.linhaBoasVindas}>seja bem-vindo ao</Text>
-          <Text style={styles.linhaAtelie}>ATELIÊ</Text>
+        {/* ---------- TOPO (saudação do perfil e cartão verde de boas-vindas) ---------- */}
+        <View style={styles.topo}>
+          {vm.saudacao ? (
+            // Só aparece depois que a cliente salva o perfil. Tocar abre a aba Perfil.
+            <Pressable
+              onPress={() => navigation.navigate('Perfil')}
+              accessibilityRole="button"
+              accessibilityLabel={`${vm.saudacao.texto} Abrir meu perfil`}
+              style={({ pressed }) => [styles.saudacao, pressed && styles.pressionado]}
+            >
+              <FotoPerfil uri={vm.saudacao.fotoUri} nome={vm.saudacao.nome} tamanho={40} />
+              <Text style={styles.textoSaudacao}>{vm.saudacao.texto}</Text>
+            </Pressable>
+          ) : null}
 
-          <View style={styles.logo} accessible accessibilityRole="header" accessibilityLabel={atelie.nome}>
-            <Text style={styles.logoLetra}>M</Text>
-            <View>
-              <Text style={styles.logoResto}>alu</Text>
-              <Text style={styles.logoResto}>andalas</Text>
+          <View style={styles.hero}>
+            <Image
+              source={IMAGEM_DECORATIVA}
+              style={styles.mandalaDecorativa}
+              accessibilityElementsHidden
+              importantForAccessibility="no"
+            />
+            <Text style={styles.linhaBoasVindas}>seja bem-vindo ao</Text>
+            <Text style={styles.linhaAtelie}>ATELIÊ</Text>
+
+            <View style={styles.logo} accessible accessibilityRole="header" accessibilityLabel={atelie.nome}>
+              <Text style={styles.logoLetra}>M</Text>
+              <View>
+                <Text style={styles.logoResto}>alu</Text>
+                <Text style={styles.logoResto}>andalas</Text>
+              </View>
             </View>
-          </View>
 
-          <Text style={styles.slogan}>{atelie.slogan}</Text>
-          <Text style={styles.prazer}>{atelie.boasVindas}</Text>
+            <Text style={styles.slogan}>{atelie.slogan}</Text>
+            <Text style={styles.prazer}>{atelie.boasVindas}</Text>
 
-          <View style={styles.botoesHero}>
-            <BotaoPrimario
-              titulo="Ver pronta entrega"
-              variante="cheioClaro"
-              // pop: volta à lista que já existe, mesmo com um Detalhe aberto por cima.
-              // Sem ele, o React Navigation 7 empilharia uma segunda lista.
-              onPress={() => navigation.navigate('ProntaEntregaTab', { screen: 'ProntaEntrega', pop: true })}
-            />
-            <BotaoPrimario
-              titulo="Encomendar a sua"
-              variante="contornoClaro"
-              // Abre o formulário mesmo que a aba esteja em Meus pedidos (pop),
-              // sem apagar o que já estava nele, como a inspiração da peça (merge).
-              onPress={() => navigation.navigate('Encomendar', { screen: 'Encomenda', pop: true, merge: true })}
-            />
+            <View style={styles.botoesHero}>
+              <BotaoPrimario
+                titulo="Ver pronta entrega"
+                variante="cheioClaro"
+                // pop: volta à lista que já existe, mesmo com um Detalhe aberto por cima.
+                // Sem ele, o React Navigation 7 empilharia uma segunda lista.
+                onPress={() => navigation.navigate('ProntaEntregaTab', { screen: 'ProntaEntrega', pop: true })}
+              />
+              <BotaoPrimario
+                titulo="Encomendar a sua"
+                variante="contornoClaro"
+                // Abre o formulário mesmo que a aba esteja em Meus pedidos (pop),
+                // sem apagar o que já estava nele, como a inspiração da peça (merge).
+                onPress={() => navigation.navigate('Encomendar', { screen: 'Encomenda', pop: true, merge: true })}
+              />
+            </View>
           </View>
         </View>
 
@@ -141,6 +157,16 @@ const styles = StyleSheet.create({
   conteudo: { ...larguraMaxima, gap: spacing.xxl, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
 
   // Topo
+  topo: { gap: spacing.md },
+  saudacao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+  },
+  textoSaudacao: { fontFamily: fonts.titulo, fontSize: fontSizes.destaque, color: colors.texto },
+  pressionado: { opacity: 0.7 },
   hero: {
     overflow: 'hidden', // corta a mandala decorativa que passa da borda
     gap: spacing.sm,

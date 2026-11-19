@@ -24,7 +24,15 @@
     "plugins": [
       "expo-font",
       "expo-status-bar",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O Malu Mandalas usa a câmera para você tirar a foto do seu perfil.",
+          "photosPermission": "O Malu Mandalas abre a sua galeria para você escolher a foto do seu perfil.",
+          "microphonePermission": false
+        }
+      ]
     ]
   }
 }

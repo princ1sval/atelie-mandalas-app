@@ -20,3 +20,16 @@ export function normalizarTexto(texto: string): string {
 export function apenasDigitos(texto: string): string {
   return texto.replace(/\D/g, '');
 }
+
+// "Ana Clara Souza" -> "AS"   |   "Ana" -> "A"   |   "" -> ""
+export function iniciais(nome: string): string {
+  const partes = nome.trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return '';
+  const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+  return (partes[0][0] + ultima).toUpperCase();
+}
+
+// "Ana Clara Souza" -> "Ana"
+export function primeiroNome(nome: string): string {
+  return nome.trim().split(/\s+/)[0] ?? '';
+}

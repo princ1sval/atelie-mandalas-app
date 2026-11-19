@@ -40,6 +40,7 @@ export type RootTabParamList = {
   PortfolioTab: NavigatorScreenParams<PortfolioStackParamList> | undefined;
   Encomendar: NavigatorScreenParams<EncomendaStackParamList> | undefined;
   Duvidas: undefined;
+  Perfil: undefined; // vira um Stack na B4, quando entrar o login
 };
 
 // ---------- PROPS DE CADA TELA (route + navigation já tipados) ----------

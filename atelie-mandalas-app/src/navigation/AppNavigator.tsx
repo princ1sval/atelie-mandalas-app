@@ -7,6 +7,7 @@ import { PortfolioStack } from './PortfolioStack';
 import { EncomendaStack } from './EncomendaStack';
 import { InicioScreen } from '../view/screens/InicioScreen';
 import { FaqScreen } from '../view/screens/FaqScreen';
+import { PerfilScreen } from '../view/screens/PerfilScreen';
 import { colors, fonts, radius } from '../view/styles/theme';
 import { NomeIcone } from '../view/styles/icons';
 
@@ -19,6 +20,7 @@ const ICONES: Record<keyof RootTabParamList, NomeIcone> = {
   PortfolioTab: 'grid',
   Encomendar: 'edit-3',
   Duvidas: 'help-circle',
+  Perfil: 'user',
 };
 
 // Navegador RAIZ: abas embaixo. Três delas têm um Stack dentro.
@@ -40,11 +42,18 @@ export function AppNavigator() {
         ),
       })}
     >
+      {/* Com seis abas, cada nome tem uns 52 px no iPhone menor. Os nomes longos ganham uma
+          versão curta só na barra (tabBarLabel); o title completo continua valendo no resto. */}
       <Tab.Screen name="Inicio" component={InicioScreen} options={{ title: 'Início' }} />
-      <Tab.Screen name="ProntaEntregaTab" component={ProntaEntregaStack} options={{ title: 'Pronta entrega' }} />
+      <Tab.Screen
+        name="ProntaEntregaTab"
+        component={ProntaEntregaStack}
+        options={{ title: 'Pronta entrega', tabBarLabel: 'Prontas' }}
+      />
       <Tab.Screen name="PortfolioTab" component={PortfolioStack} options={{ title: 'Portfólio' }} />
-      <Tab.Screen name="Encomendar" component={EncomendaStack} options={{ title: 'Encomendar' }} />
+      <Tab.Screen name="Encomendar" component={EncomendaStack} options={{ title: 'Encomendar', tabBarLabel: 'Pedidos' }} />
       <Tab.Screen name="Duvidas" component={FaqScreen} options={{ title: 'Dúvidas' }} />
+      <Tab.Screen name="Perfil" component={PerfilScreen} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
   );
 }

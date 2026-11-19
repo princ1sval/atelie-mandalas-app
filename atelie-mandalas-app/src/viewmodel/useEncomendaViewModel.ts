@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ErrosPedido, PedidoEncomenda, TamanhoEncomenda } from '../model/Encomenda';
 import { Mandala, NOMES_TEMA, TemaEncomenda } from '../model/Mandala';
+import { Perfil } from '../model/Perfil';
 import { EncomendaService, LIMITE_IDEIA, TAMANHOS_ENCOMENDA } from '../services/EncomendaService';
 import { MandalaService } from '../services/MandalaService';
+import { PerfilService } from '../services/PerfilService';
 import { formatarFaixaPreco, formatarTelefone } from '../utils/formatters';
 
 export interface OpcaoTema {
@@ -50,6 +52,7 @@ export function useEncomendaViewModel(
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
   const [rascunhoPronto, setRascunhoPronto] = useState(false); // vira true depois de ler o rascunho salvo
+  const [perfil, setPerfil] = useState<Perfil>(PerfilService.criarPerfilVazio); // preenche nome e WhatsApp
 
   // A aba fica montada: quando chegam parâmetros novos ("Quero uma assim"), atualiza o pedido.
   useEffect(() => {
@@ -71,10 +74,10 @@ export function useEncomendaViewModel(
     setProtocolo(null);
   }, [limparEmRecebido]);
 
-  // Ao abrir, lê o rascunho salvo (seção 3.1).
+  // Ao abrir, lê o rascunho salvo (seção 3.1) e depois o perfil, que preenche os campos vazios.
   useEffect(() => {
     let ativo = true; // se a tela fechar antes de a leitura terminar, a resposta é ignorada
-    async function lerRascunho() {
+    async function lerDadosSalvos() {
       try {
         const rascunho = await EncomendaService.carregarRascunho();
         if (ativo && rascunho) {
@@ -88,16 +91,35 @@ export function useEncomendaViewModel(
         }
       } catch {
         // Não deu para ler o rascunho: o formulário só começa vazio.
-      } finally {
-        // Só agora o salvamento pode começar. Antes disso, o formulário ainda vazio apagaria o rascunho.
-        if (ativo) setRascunhoPronto(true);
       }
+
+      try {
+        const salvo = await PerfilService.carregar();
+        if (ativo) {
+          setPerfil(salvo);
+          setPedido((atual) => EncomendaService.preencherComPerfil(atual, salvo));
+        }
+      } catch {
+        // Sem perfil, a cliente digita o nome e o WhatsApp.
+      }
+
+      // Só agora o salvamento pode começar. Antes disso, o formulário ainda vazio apagaria o rascunho.
+      if (ativo) setRascunhoPronto(true);
     }
-    lerRascunho();
+    lerDadosSalvos();
     return () => {
       ativo = false;
     };
   }, []);
+
+  // A aba fica montada: se o perfil mudar na aba Perfil, o formulário acompanha.
+  // O efeito roda de novo a cada perfil novo, então "perfil" aqui é sempre o anterior à mudança.
+  useEffect(() => {
+    return PerfilService.observar((novo) => {
+      setPedido((atual) => EncomendaService.preencherComPerfil(atual, novo, perfil));
+      setPerfil(novo);
+    });
+  }, [perfil]);
 
   // Salva o rascunho 500 ms depois da última alteração, e não a cada letra digitada.
   // Cada alteração cancela a espera anterior: é o clearTimeout do return.
@@ -105,12 +127,12 @@ export function useEncomendaViewModel(
     // Não salva antes de ler o rascunho, durante o envio nem com a confirmação aberta.
     if (!rascunhoPronto || enviando || protocolo !== null) return;
     const espera = setTimeout(() => {
-      EncomendaService.salvarRascunho(pedido).catch(() => {
+      EncomendaService.salvarRascunho(pedido, perfil).catch(() => {
         // Se falhar, a cliente só perde a conveniência do rascunho.
       });
     }, 500);
     return () => clearTimeout(espera);
-  }, [pedido, rascunhoPronto, enviando, protocolo]);
+  }, [pedido, perfil, rascunhoPronto, enviando, protocolo]);
 
   // Busca a mandala que inspirou o pedido sempre que o id mudar.
   useEffect(() => {
@@ -158,8 +180,9 @@ export function useEncomendaViewModel(
     }
   }
 
+  // "Fazer outro pedido": formulário novo, já com o nome e o WhatsApp do perfil.
   function novoPedido() {
-    setPedido(EncomendaService.criarPedidoInicial());
+    setPedido(EncomendaService.preencherComPerfil(EncomendaService.criarPedidoInicial(), perfil));
     setTentouEnviar(false);
     setErroEnvio(null);
     setProtocolo(null);

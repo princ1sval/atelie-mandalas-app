@@ -25,7 +25,7 @@ export function MeusPedidosScreen({ navigation }: MeusPedidosScreenProps) {
   async function apagarMeusDados() {
     const confirmou = await confirmar(
       'Apagar meus dados?',
-      'Os pedidos e o rascunho do formulário serão apagados deste aparelho. Isso não pode ser desfeito.',
+      'Os pedidos, o rascunho do formulário e o seu perfil, com a foto, serão apagados deste aparelho. Isso não pode ser desfeito.',
       'Apagar',
     );
     if (!confirmou) return;
@@ -57,7 +57,7 @@ export function MeusPedidosScreen({ navigation }: MeusPedidosScreenProps) {
         <View style={styles.rodape}>
           <BotaoPrimario titulo="Apagar meus dados" variante="contorno" icone="trash-2" onPress={apagarMeusDados} />
           <Text style={[typography.pequeno, styles.centralizado]}>
-            Apaga os pedidos e o rascunho do formulário guardados neste aparelho.
+            Apaga os pedidos, o rascunho do formulário e o perfil com a foto, guardados neste aparelho.
           </Text>
           {vm.aviso ? <Text style={styles.aviso}>{vm.aviso}</Text> : null}
         </View>
