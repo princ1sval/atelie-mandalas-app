@@ -1,12 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Feather from '@expo/vector-icons/Feather';
 import { ProntaEntregaScreenProps } from '../../navigation/types';
 import { useProntaEntregaViewModel } from '../../viewmodel/useProntaEntregaViewModel';
+import { useChacoalhar } from '../hooks/useChacoalhar';
 import { CampoTexto } from '../components/CampoTexto';
 import { GradeMandalas } from '../components/GradeMandalas';
 import { MensagemEstado } from '../components/MensagemEstado';
 import { TituloSecao } from '../components/TituloSecao';
-import { colors, spacing, typography } from '../styles/theme';
+import { colors, fonts, fontSizes, radius, spacing, typography } from '../styles/theme';
 
 // A tela só DESENHA: os dados e as ações vêm do ViewModel.
 export function ProntaEntregaScreen({ navigation }: ProntaEntregaScreenProps) {
@@ -16,6 +18,15 @@ export function ProntaEntregaScreen({ navigation }: ProntaEntregaScreenProps) {
   function abrirDetalhe(mandalaId: string) {
     navigation.navigate('DetalheMandala', { mandalaId });
   }
+
+  // Chacoalhar o celular abre uma peça sorteada. O ViewModel sorteia; a tela só navega.
+  function abrirSurpresa() {
+    const id = vm.mandalaSurpresa();
+    if (id) abrirDetalhe(id);
+  }
+
+  // O hook liga o acelerômetro só com esta tela visível e diz se o aparelho tem o sensor.
+  const sensorDisponivel = useChacoalhar(abrirSurpresa);
 
   function renderizarConteudo() {
     if (vm.carregando) {
@@ -43,6 +54,15 @@ export function ProntaEntregaScreen({ navigation }: ProntaEntregaScreenProps) {
           titulo="Pronta entrega"
           descricao="Estilos já definidos, prontos para ir para a sua casa."
         />
+
+        {/* A dica só aparece quando há sensor e peças para sortear (no navegador, nunca). */}
+        {sensorDisponivel && !vm.carregando && !vm.erro ? (
+          <View style={styles.dica}>
+            <Feather name="smartphone" size={16} color={colors.primariaEscura} />
+            <Text style={styles.textoDica}>Chacoalhe o celular para uma surpresa</Text>
+          </View>
+        ) : null}
+
         <CampoTexto
           formato="arredondado"
           icone="search"
@@ -68,4 +88,15 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
   },
+  dica: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.salviaClara,
+  },
+  textoDica: { fontFamily: fonts.corpoMedio, fontSize: fontSizes.pequeno, color: colors.primariaEscura },
 });

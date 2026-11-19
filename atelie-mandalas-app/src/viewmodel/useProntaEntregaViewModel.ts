@@ -12,6 +12,7 @@ export interface ProntaEntregaViewModel {
   erro: string | null;
   alterarBusca: (texto: string) => void;
   recarregar: () => void;
+  mandalaSurpresa: () => string | null; // id da peça sorteada, ou null enquanto não há peças
 }
 
 export function useProntaEntregaViewModel(): ProntaEntregaViewModel {
@@ -19,6 +20,7 @@ export function useProntaEntregaViewModel(): ProntaEntregaViewModel {
   const [busca, setBusca] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [ultimaSurpresaId, setUltimaSurpresaId] = useState<string | undefined>(); // para não repetir
 
   // Busca os dados no Service (que busca no Repository). A tela nem sabe que isso existe.
   const carregar = useCallback(async () => {
@@ -46,6 +48,15 @@ export function useProntaEntregaViewModel(): ProntaEntregaViewModel {
       ? formatarQuantidade(mandalas.length, 'peça disponível', 'peças disponíveis')
       : formatarQuantidade(mandalas.length, 'peça encontrada', 'peças encontradas');
 
+  // Surpresa do "chacoalhar": o sorteio é entre todas as peças prontas, mesmo com uma busca digitada.
+  // Quem sorteia é o Service; o ViewModel só lembra a última, para não repetir. Navegar fica com a tela.
+  function mandalaSurpresa(): string | null {
+    const sorteada = MandalaService.sortear(todas, ultimaSurpresaId);
+    if (!sorteada) return null;
+    setUltimaSurpresaId(sorteada.id);
+    return sorteada.id;
+  }
+
   return {
     mandalas,
     busca,
@@ -54,5 +65,6 @@ export function useProntaEntregaViewModel(): ProntaEntregaViewModel {
     erro,
     alterarBusca: setBusca,
     recarregar: carregar,
+    mandalaSurpresa,
   };
 }

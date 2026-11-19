@@ -60,6 +60,14 @@ function descreverOrigem(mandala: Mandala): string {
   return mandala.tema ? `Encomenda · ${NOMES_TEMA[mandala.tema]}` : 'Encomenda';
 }
 
+// Sorteia uma mandala da lista para a surpresa do "chacoalhar".
+// Quando há outra opção, evita repetir a última sorteada, para a surpresa não parecer travada.
+function sortear(lista: Mandala[], ultimaId?: string): Mandala | null {
+  const opcoes = lista.length > 1 ? lista.filter((mandala) => mandala.id !== ultimaId) : lista;
+  if (opcoes.length === 0) return null;
+  return opcoes[Math.floor(Math.random() * opcoes.length)];
+}
+
 // Regra do Detalhe: pronta entrega -> "Tenho interesse"; portfólio -> "Quero uma assim".
 function obterAcaoDetalhe(mandala: Mandala): AcaoDetalhe {
   if (mandala.origem === 'prontaEntrega') {
@@ -87,4 +95,5 @@ export const MandalaService = {
   opcoesDeFiltro,
   descreverOrigem,
   obterAcaoDetalhe,
+  sortear,
 };
