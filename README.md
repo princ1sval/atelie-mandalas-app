@@ -32,8 +32,9 @@ Trabalho individual da disciplina **Programação para Dispositivos Móveis** (F
 | 2 | **Pronta entrega** | Grade com as peças à venda (nome, tamanho e preço) e **busca por nome ou cor**, sem diferenciar acentos. Tocar num card abre o Detalhe. |
 | 3 | **Detalhe da mandala** | Recebe o **`mandalaId`** por parâmetro. Mostra imagem, técnica, tamanho e a história da peça. O botão muda conforme a origem: **"Tenho interesse"** (abre o WhatsApp com mensagem pronta) ou **"Quero uma assim"** (leva à Encomenda com o tema já escolhido). Tem botão de **compartilhar**. |
 | 4 | **Portfólio** | Encomendas já entregues, com **filtro por tema** (Família, Pet, Homenagem, Casal, Outro). Usa a mesma tela de Detalhe. |
-| 5 | **Encomenda** | Formulário de pedido personalizado: nome, WhatsApp com máscara, tema, tamanho, cores, ideia (com contador), presente. **Estimativa de preço e prazo ao vivo**, validação dos campos e confirmação com número de protocolo. |
+| 5 | **Encomenda** | Formulário de pedido personalizado: nome, WhatsApp com máscara, tema, tamanho, cores, ideia (com contador), presente. **Estimativa de preço e prazo ao vivo**, validação dos campos e confirmação com número de protocolo. O que foi preenchido fica salvo como **rascunho** e volta quando o app é reaberto. |
 | 6 | **Dúvidas (FAQ)** | Perguntas agrupadas por categoria numa **SectionList**, com busca e respostas que abrem e fecham. Atalho para falar com o ateliê no WhatsApp. |
+| 7 | **Meus pedidos** | Aberta pela Encomenda. Mostra o **histórico salvo no aparelho** (SQLite), do pedido mais recente para o mais antigo, com protocolo, data e estimativa. Cada pedido pode ser **excluído**, e **"Apagar meus dados"** remove tudo o que o app guardou. |
 
 ---
 
@@ -69,6 +70,7 @@ npx expo start
      ```
      No Expo Go, toque no ícone de conta (canto superior direito) e entre com a mesma conta.
 6. O computador e o celular precisam estar **na mesma rede Wi-Fi**. Redes que bloqueiam essa conexão, como a da faculdade, podem impedir o acesso. Nesse caso, use o roteador do celular (hotspot).
+7. **Para abrir no navegador** (opcional), aperte `w` no terminal do `npx expo start`. Veja as diferenças da [versão web](#versão-web).
 
 ### Comandos úteis
 
@@ -89,16 +91,20 @@ flowchart LR
   V["View<br/>screens + components<br/>(só desenha)"] --> VM["ViewModel<br/>hooks useXxxViewModel<br/>(estado + ações)"]
   VM --> S["Services<br/>regras de negócio"]
   S --> R["Repositories<br/>acesso aos dados<br/>(assíncrono)"]
-  R --> M["Mocks<br/>arquivos locais"]
+  R --> M["Mocks<br/>catálogo, FAQ e ateliê"]
+  R --> D["DAO<br/>PedidoDao (SQL)"]
+  D --> DB[("SQLite<br/>histórico de pedidos")]
+  R --> AS[("AsyncStorage<br/>rascunho")]
 ```
 
 | Camada | Pasta | Responsabilidade |
 |--------|-------|------------------|
-| **Model** | `src/model` | Tipos e entidades: `Mandala`, `PedidoEncomenda`, `PerguntaFaq`, `Atelie`. |
+| **Model** | `src/model` | Tipos e entidades: `Mandala`, `PedidoEncomenda`, `PedidoSalvo`, `PerguntaFaq`, `Atelie`. |
 | **View** | `src/view` | Telas e componentes. Só desenham o que o ViewModel entrega e repassam as ações do usuário. **Não têm regra de negócio.** |
 | **ViewModel** | `src/viewmodel` | Um hook por tela. Guarda o estado (`useState`), carrega os dados (`useEffect`), calcula valores derivados (`useMemo`) e expõe ações. Cada um tem uma `interface` que é o contrato com a tela. |
-| **Services** | `src/services` | Regras de negócio: separar pronta entrega e portfólio, buscar sem acento, filtrar por tema, decidir o botão do Detalhe, validar o pedido, estimar preço e prazo, agrupar o FAQ, montar os links do WhatsApp. |
-| **Repositories** | `src/data/repositories` | Única porta de acesso aos dados. Cada um tem uma `interface` (contrato) e uma implementação que hoje lê os mocks. |
+| **Services** | `src/services` | Regras de negócio: separar pronta entrega e portfólio, buscar sem acento, filtrar por tema, decidir o botão do Detalhe, validar o pedido, estimar preço e prazo, guardar e conferir o rascunho, apagar os dados da cliente, agrupar o FAQ, montar os links do WhatsApp. |
+| **Repositories** | `src/data/repositories` | Única porta de acesso aos dados. Cada um tem uma `interface` (contrato) e uma implementação: os do catálogo, do FAQ e do ateliê leem os mocks; o de encomendas grava no SQLite, pelo DAO; o de rascunho usa o AsyncStorage. |
+| **DB** | `src/db` | Banco SQLite: abre a conexão (`dbConfig.ts`), aplica as migrations (`migrations.ts`) e reúne o SQL da tabela de pedidos (`PedidoDao.ts`). |
 | **Mocks** | `src/data/mocks` | Dados falsos em arquivos locais. |
 
 ### Por que MVVM?
@@ -111,6 +117,67 @@ flowchart LR
 
 ---
 
+## Persistência e privacidade
+
+Seguindo o material **18 – Persistência**, cada dado fica no lugar que combina com o tipo dele (mapa de decisão da seção 7.1):
+
+| Dado | Onde fica | Por quê |
+|------|-----------|---------|
+| Histórico de pedidos: protocolo, tema, tamanho, cores, ideia, presente, inspiração, estimativa e data | **SQLite** (`expo-sqlite`), tabela `pedidos` | É uma lista que cresce e aparece em ordem (seção 4.1) |
+| Rascunho do formulário de encomenda, inclusive nome e WhatsApp | **AsyncStorage**, uma chave com JSON | É um único objeto, sobrescrito a cada alteração e sem busca (seção 3.1) |
+| Nome e WhatsApp depois do envio | **Não são guardados** | O histórico não precisa deles (seção 7.3) |
+| Mandalas, perguntas do FAQ, dados do ateliê e preços | **No código** (mocks) | São do app e só de leitura |
+| Senha, token e cartão | **Não existem no app** | Não há login, e o pagamento é combinado pelo WhatsApp (seção 7.2) |
+
+### SQLite: configuração e migrations
+
+- O banco `malu-mandalas.db` abre uma vez, quando o app inicia, em `src/db/dbConfig.ts`, com **WAL**, **foreign_keys** ligado e `synchronous = NORMAL` (seções 4.4 e 4.5).
+- A estrutura evolui por **migrations**, controladas pelo `PRAGMA user_version` (seção 4.3). Cada uma roda **uma vez por aparelho** e **dentro de uma transação**: ou é aplicada inteira, ou nada muda.
+
+| Versão | O que faz |
+|--------|-----------|
+| 1 | Cria a tabela `pedidos`, já sem colunas de nome e WhatsApp |
+| 2 | Acrescenta a estimativa (`precoMinimo`, `precoMaximo`, `prazoDias`) com `ALTER TABLE`, sem apagar os pedidos que já existiam. Esses aparecem com "Estimativa não registrada" |
+
+- Para mudar o banco, acrescenta-se uma versão nova no fim da lista. Uma versão que já rodou nunca é editada, porque os aparelhos que a aplicaram não a rodariam de novo.
+- Todo o SQL da tabela fica no `PedidoDao`, com `?` no lugar dos valores: o texto digitado nunca vira parte do comando.
+
+### Rascunho no AsyncStorage
+
+- É salvo 500 ms depois da última alteração, e não a cada letra.
+- Só começa a salvar depois de ler o rascunho anterior. Antes disso, o formulário ainda vazio o apagaria.
+- O tema e a inspiração vindos do "Quero uma assim" têm prioridade sobre os do rascunho.
+- É apagado quando o pedido é enviado e quando o formulário fica vazio.
+- O que vem do armazenamento é conferido antes de voltar à tela: um JSON estragado ou um campo estranho não quebra o formulário.
+
+### Privacidade (LGPD, seção 7.3)
+
+- **Tudo fica neste aparelho.** O envio do pedido é simulado, e nada sai do celular.
+- **Só o necessário:** o histórico não guarda nome nem WhatsApp, e o rascunho existe só enquanto o formulário está sendo preenchido.
+- **A cliente pode apagar tudo:** em Meus pedidos, cada pedido pode ser excluído, e **"Apagar meus dados"** remove o rascunho e todo o histórico. O catálogo continua, porque é do app e não da cliente (seção 9.3).
+- **Ao desinstalar o app**, o SQLite e o AsyncStorage são apagados (seção 8.1). Um backup do aparelho, no iCloud ou no Google, pode restaurá-los (seção 8.3).
+- A ideia da encomenda é texto livre e pode citar algo sensível, como numa homenagem. Por isso a exclusão está sempre à mão.
+
+### Diferenças em relação ao material
+
+- **Transação nas migrations:** sem ela, uma falha no meio deixaria o banco pela metade.
+- **`datetime('now', 'localtime')`:** o `datetime('now')` grava em UTC, 3 horas à frente de Brasília.
+- **Migration 2 sem `DEFAULT`:** o `DEFAULT (datetime(...))` do exemplo da seção 10 falha em `ALTER TABLE`. Aqui os pedidos antigos ficam com a estimativa em branco (NULL).
+- **Histórico ordenado por `id`:** a seção 4.2 ordena pela data, mas dois pedidos no mesmo segundo empatariam.
+- **`JSON.parse` protegido:** um rascunho estragado é ignorado em vez de quebrar a tela.
+- **Sem MMKV e sem SecureStore:** o MMKV exige development build, e o app roda no Expo Go. O SecureStore serve para tokens e senhas, que o app não tem.
+
+### Versão web
+
+O app também abre no navegador (tecla `w` no `npx expo start`). O `metro.config.js` permite o SQLite na web, que roda em WebAssembly e precisa de dois cabeçalhos de segurança. O que muda em relação ao celular:
+
+- ao iniciar o app, a primeira abertura do banco passa do tempo-limite do `expo-sqlite` e aparece um erro no console; a chamada seguinte abre o banco normalmente;
+- o banco do navegador não usa WAL (`journal_mode=delete`);
+- os dados ficam no armazenamento do navegador, separados dos do celular;
+- as confirmações usam o `confirm` do navegador, porque o `Alert` do React Native não funciona na web.
+
+---
+
 ## Estrutura de pastas
 
 Organização **por tipo** (camada), coerente com o MVVM:
@@ -120,8 +187,9 @@ atelie-mandalas-app/                 ← repositório
 ├── README.md
 ├── docs/screenshots/                ← imagens deste README
 └── atelie-mandalas-app/             ← projeto Expo
-    ├── App.tsx                      ← carrega as fontes e monta a navegação
+    ├── App.tsx                      ← carrega as fontes, abre o banco e monta a navegação
     ├── app.json                     ← nome, ícone e configurações do app
+    ├── metro.config.js              ← SQLite na versão web
     ├── assets/
     │   └── mandalas/                ← imagens das mandalas
     └── src/
@@ -130,6 +198,10 @@ atelie-mandalas-app/                 ← repositório
         │   ├── Encomenda.ts
         │   ├── Faq.ts
         │   └── Mandala.ts
+        ├── db/                      ← banco SQLite
+        │   ├── dbConfig.ts          ← abre a conexão (WAL, foreign_keys) e roda as migrations
+        │   ├── migrations.ts        ← versões do banco (PRAGMA user_version)
+        │   └── PedidoDao.ts         ← SQL da tabela pedidos
         ├── data/
         │   ├── mocks/               ← dados falsos (arquivos locais)
         │   │   ├── atelie.mock.ts
@@ -137,9 +209,10 @@ atelie-mandalas-app/                 ← repositório
         │   │   └── mandalas.mock.ts
         │   └── repositories/        ← acesso aos dados (interface + implementação)
         │       ├── AtelieRepository.ts
-        │       ├── EncomendaRepository.ts
+        │       ├── EncomendaRepository.ts   ← pedidos no SQLite, pelo PedidoDao
         │       ├── FaqRepository.ts
-        │       └── MandalaRepository.ts
+        │       ├── MandalaRepository.ts
+        │       └── RascunhoRepository.ts    ← rascunho no AsyncStorage
         ├── services/                ← regras de negócio
         │   ├── AtelieService.ts
         │   ├── EncomendaService.ts
@@ -151,22 +224,25 @@ atelie-mandalas-app/                 ← repositório
         │   ├── useDetalheMandalaViewModel.ts
         │   ├── usePortfolioViewModel.ts
         │   ├── useEncomendaViewModel.ts
+        │   ├── useMeusPedidosViewModel.ts
         │   └── useFaqViewModel.ts
         ├── view/                    ← VIEW
-        │   ├── screens/             ← as 6 telas
+        │   ├── screens/             ← as 7 telas
         │   ├── components/          ← componentes autorais reutilizáveis
         │   ├── hooks/               ← hooks visuais (useGrade: colunas responsivas)
-        │   └── styles/              ← tema: colors, spacing, typography, icons, theme
+        │   ├── styles/              ← tema: colors, spacing, typography, icons, theme
+        │   └── utils/               ← confirmar: Alert no celular, confirm na web
         ├── navigation/              ← navegadores e tipos das rotas
         │   ├── AppNavigator.tsx     ← Tab (raiz)
         │   ├── ProntaEntregaStack.tsx
         │   ├── PortfolioStack.tsx
+        │   ├── EncomendaStack.tsx
         │   ├── opcoesStack.ts
         │   ├── temaNavegacao.ts
         │   └── types.ts             ← ParamLists e props tipadas
         └── utils/                   ← funções puras de apoio
             ├── esperar.ts
-            ├── formatters.ts        ← moeda, faixa de preço, telefone, plural
+            ├── formatters.ts        ← moeda, faixa de preço, telefone, data, plural
             ├── texto.ts             ← normalizar texto, apenas dígitos
             └── validators.ts
 ```
@@ -175,7 +251,7 @@ atelie-mandalas-app/                 ← repositório
 
 ## Navegação
 
-**React Navigation 7**, com navegação **aninhada**: **Tab** na raiz e um **Stack** dentro das abas Pronta entrega e Portfólio. Todas as rotas são **tipadas** em `src/navigation/types.ts`.
+**React Navigation 7**, com navegação **aninhada**: **Tab** na raiz e um **Stack** dentro das abas Pronta entrega, Portfólio e Encomendar. Todas as rotas são **tipadas** em `src/navigation/types.ts`.
 
 ```
 Tab.Navigator (raiz)
@@ -184,14 +260,17 @@ Tab.Navigator (raiz)
 │                             └─ DetalheMandala   { mandalaId: string }
 ├── PortfolioTab ───── Stack ─┬─ Portfolio
 │                             └─ DetalheMandala   { mandalaId: string }
-├── Encomendar                   { tema?: TemaEncomenda; inspiracaoId?: string }
+├── Encomendar ─────── Stack ─┬─ Encomenda        { tema?; inspiracaoId?; limparEm? }
+│                             └─ MeusPedidos
 └── Duvidas
 ```
 
 - Cada aba com Stack guarda **o próprio histórico**.
 - Os parâmetros são sempre **simples (serializáveis)**: passa-se o **id**, e o Detalhe busca a mandala pelo Service.
-- `CompositeScreenProps` permite que uma tela dentro de um Stack navegue para outra aba. É assim que "Quero uma assim" vai do Detalhe para a aba Encomendar levando `tema` e `inspiracaoId`.
+- `CompositeScreenProps` permite que uma tela dentro de um Stack navegue para outra aba. É assim que "Quero uma assim" vai do Detalhe para o formulário da aba Encomendar levando `tema` e `inspiracaoId`.
 - A mesma tela `DetalheMandalaScreen` é usada nos dois Stacks.
+- No React Navigation 7, navegar para uma tela que já está na pilha, mas não está à vista, **empilha uma cópia nova**. Por isso o "Quero uma assim" e os atalhos do Início usam `pop: true`, que volta à tela que já existe. O "Encomendar a sua" também usa `merge: true`, para manter a inspiração escolhida.
+- Depois de "Apagar meus dados", Meus pedidos volta ao formulário com `popTo` e o parâmetro `limparEm`, que esvazia o formulário guardado na memória.
 
 ---
 
@@ -201,17 +280,17 @@ Tab.Navigator (raiz)
 
 | Componente | Props principais | Usado em |
 |------------|------------------|----------|
-| `BotaoPrimario` | `titulo`, `onPress`, `variante`, `icone`, `carregando`, `desabilitado` | Início, Detalhe, Encomenda, Dúvidas, MensagemEstado |
+| `BotaoPrimario` | `titulo`, `onPress`, `variante`, `icone`, `carregando`, `desabilitado` | Início, Detalhe, Encomenda, Meus pedidos, Dúvidas, MensagemEstado |
 | `CampoTexto` | `rotulo`, `erro`, `icone`, `formato`, `mostrarContador` + todas as props de `TextInput` | Pronta entrega, Encomenda, Dúvidas |
 | `Chip` | `rotulo`, `selecionado`, `onPress` | Portfólio (filtro), Encomenda (tema e tamanho) |
-| `TituloSecao` | `titulo`, `sobretitulo`, `descricao`, `nivel` | Todas as telas |
+| `TituloSecao` | `titulo`, `sobretitulo`, `descricao`, `nivel` | Todas as telas, menos Meus pedidos, que usa o título do cabeçalho |
 | `MandalaCard` | `mandala`, `onPress`, `style` | Pronta entrega, Portfólio |
 | `GradeMandalas` | `mandalas`, `onAbrirMandala`, `mensagemVazia` | Pronta entrega, Portfólio |
-| `MensagemEstado` | `tipo` (carregando, erro ou vazio), `mensagem`, `onTentarNovamente` | Início, Pronta entrega, Detalhe, Portfólio, Dúvidas |
+| `MensagemEstado` | `tipo` (carregando, erro ou vazio), `mensagem`, `onTentarNovamente` | Início, Pronta entrega, Detalhe, Portfólio, Meus pedidos, Dúvidas |
 
 ### Componentes nativos do React Native usados
 
-`View`, `Text`, `Image`, `ScrollView`, **`FlatList`** (grade de mandalas), **`SectionList`** (FAQ), **`TextInput`** (busca e formulário), `Pressable`, `Switch`, `Modal`, `ActivityIndicator`. Também são usadas as APIs `Linking` (WhatsApp), `Share` (compartilhar), `Keyboard`, `Platform` e `useWindowDimensions`.
+`View`, `Text`, `Image`, `ScrollView`, **`FlatList`** (grade de mandalas), **`SectionList`** (FAQ), **`TextInput`** (busca e formulário), `Pressable`, `Switch`, `Modal`, `ActivityIndicator`. Também são usadas as APIs `Linking` (WhatsApp), `Share` (compartilhar), `Alert` (confirmações), `Keyboard`, `Platform` e `useWindowDimensions`.
 
 ---
 
@@ -242,6 +321,9 @@ Tab.Navigator (raiz)
 | react-native-screens / react-native-safe-area-context | 4.30 / 5.11 | Dependências da navegação e áreas seguras |
 | @expo/vector-icons (Feather) | 15 | Ícones |
 | expo-font + @expo-google-fonts (Fraunces e Poppins) | 58 / 0.4 | Fontes da identidade visual |
+| expo-sqlite | 58 | Banco local: histórico de pedidos |
+| @react-native-async-storage/async-storage | 2.2 | Rascunho do formulário |
+| react-dom + react-native-web | 19.3 / 0.21 | Versão para o navegador |
 
 Todas as bibliotecas foram instaladas com **`npx expo install`**, que escolhe a versão compatível com o SDK.
 
@@ -249,7 +331,7 @@ Todas as bibliotecas foram instaladas com **`npx expo install`**, que escolhe a 
 
 ## Preparação para a Parte 2
 
-A fonte de dados pode ser trocada (API, banco local etc.) **mexendo só nos Repositories**. Cada Repository tem uma interface, por exemplo:
+A fonte de dados pode ser trocada (API, banco local etc.) **mexendo só nos Repositories**. Isso já aconteceu na persistência: o `EncomendaRepository` trocou o array em memória pelo SQLite sem mudar o Service, o ViewModel nem a tela. Cada Repository tem uma interface, por exemplo:
 
 ```ts
 export interface MandalaRepository {
@@ -282,16 +364,17 @@ Services, ViewModels e telas continuam iguais. Os ViewModels já tratam **carreg
 | Requisito | Como foi atendido |
 |-----------|-------------------|
 | Expo Managed + TypeScript, commits progressivos | Template `blank-typescript` (criado no SDK 57 e atualizado para o 58), um commit por etapa |
-| Mínimo de 6 telas com propósito real | Início, Pronta entrega, Detalhe, Portfólio, Encomenda, Dúvidas |
-| Tab ou Drawer na raiz + Stack interno | Tab na raiz + Stacks de Pronta entrega e Portfólio |
-| Tela que recebe parâmetros e rotas tipadas | `DetalheMandala { mandalaId }` e `Encomendar { tema?, inspiracaoId? }`, em `navigation/types.ts` |
+| Mínimo de 6 telas com propósito real | 7 telas: Início, Pronta entrega, Detalhe, Portfólio, Encomenda, Meus pedidos, Dúvidas |
+| Tab ou Drawer na raiz + Stack interno | Tab na raiz + Stacks de Pronta entrega, Portfólio e Encomendar |
+| Tela que recebe parâmetros e rotas tipadas | `DetalheMandala { mandalaId }` e `Encomenda { tema?, inspiracaoId?, limparEm? }`, em `navigation/types.ts` |
 | 6+ componentes nativos, com lista e campo de entrada | 11 componentes, entre eles `FlatList`, `SectionList` e `TextInput` |
 | 3+ componentes autorais tipados e reutilizados | 7 componentes, cada um usado em mais de uma tela |
-| MVC, MVP ou MVVM aplicado de forma consistente | MVVM: 6 telas e 6 ViewModels; regras nos Services |
+| MVC, MVP ou MVVM aplicado de forma consistente | MVVM: 7 telas e 7 ViewModels; regras nos Services |
 | Pastas coerentes com a arquitetura | Organização por tipo (camada) |
 | `StyleSheet.create`, tema centralizado, layout adaptável | Tema em `view/styles`, sem cores soltas, grade responsiva |
-| Biblioteca de terceiros via `npx expo install` | React Navigation, @expo/vector-icons, expo-font e Google Fonts |
+| Biblioteca de terceiros via `npx expo install` | React Navigation, @expo/vector-icons, expo-font, Google Fonts, expo-sqlite e AsyncStorage |
 | Dados mockados acessados por camada própria | Mocks → Repositories → Services |
+| Persistência local (aula 18) | SQLite com migrations, WAL e DAO para o histórico; AsyncStorage para o rascunho; exclusão dos dados (LGPD). Veja [Persistência e privacidade](#persistência-e-privacidade) |
 
 ---
 
@@ -299,7 +382,7 @@ Services, ViewModels e telas continuam iguais. Os ViewModels já tratam **carreg
 
 - As **imagens das mandalas** são ilustrações provisórias criadas para o protótipo. As fotos reais das peças do ateliê vão substituí-las mantendo os mesmos nomes de arquivo. Fotos de encomendas (pessoas, pets, homenagens) só entram com autorização dos clientes.
 - **Preços e prazos** são provisórios. O WhatsApp do ateliê fica em `src/data/mocks/atelie.mock.ts`.
-- O envio de encomenda é **simulado**: o Repository gera um número de protocolo e guarda o pedido só na memória enquanto o app está aberto.
+- O envio de encomenda é **simulado**: o pedido não chega à Malu. Ele fica só no histórico deste aparelho (SQLite), sem nome e WhatsApp.
 
 ---
 
