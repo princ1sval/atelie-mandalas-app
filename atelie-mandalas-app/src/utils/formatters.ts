@@ -39,6 +39,14 @@ export function formatarDataHora(dataHora: string): string {
   return `${dia}/${mes}/${ano} às ${hora.slice(0, 5)}`;
 }
 
+const inteiro = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+
+// 0.4 -> "menos de 1 km"   |   3.6 -> "4 km"   |   1234.5 -> "1.235 km"
+export function formatarDistancia(km: number): string {
+  if (km < 1) return 'menos de 1 km';
+  return `${inteiro.format(km)} km`;
+}
+
 // (1, 'peça', 'peças') -> "1 peça"   |   (6, 'peça', 'peças') -> "6 peças"
 export function formatarQuantidade(quantidade: number, singular: string, plural: string): string {
   return `${quantidade} ${quantidade === 1 ? singular : plural}`;

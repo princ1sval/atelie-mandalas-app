@@ -100,6 +100,28 @@ export function PerfilScreen() {
           keyboardType="phone-pad"
         />
 
+        <View style={styles.grupo}>
+          <CampoTexto
+            rotulo="Cidade (opcional)"
+            placeholder="Ex.: Muriaé – MG"
+            value={vm.perfil.cidade ?? ''}
+            onChangeText={vm.alterarCidade}
+            autoCapitalize="words"
+          />
+          {/* No navegador o botão some: lá a cliente digita a cidade. */}
+          {vm.localizacaoDisponivel ? (
+            <BotaoPrimario
+              titulo="Usar minha localização"
+              variante="contorno"
+              icone="map-pin"
+              onPress={vm.usarMinhaLocalizacao}
+              carregando={vm.buscandoCidade}
+            />
+          ) : null}
+          {vm.distanciaTexto ? <Text style={styles.distancia}>{vm.distanciaTexto}</Text> : null}
+          {vm.avisoCidade ? <Text style={styles.erro}>{vm.avisoCidade}</Text> : null}
+        </View>
+
         <View style={styles.envio}>
           <BotaoPrimario titulo="Salvar" icone="check" onPress={salvar} carregando={vm.salvando} />
           {vm.erroSalvar ? <Text style={[styles.erro, styles.centralizado]}>{vm.erroSalvar}</Text> : null}
@@ -121,6 +143,8 @@ const styles = StyleSheet.create({
   link: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   textoLink: { fontFamily: fonts.corpoForte, fontSize: fontSizes.pequeno, color: colors.primariaEscura },
   pressionado: { opacity: 0.7 },
+  grupo: { gap: spacing.sm },
+  distancia: { fontFamily: fonts.corpoForte, fontSize: fontSizes.pequeno, color: colors.primariaEscura },
   envio: { gap: spacing.sm },
   erro: { ...typography.pequeno, color: colors.erro },
   sucesso: { ...typography.pequeno, fontFamily: fonts.corpoForte, color: colors.primariaEscura },

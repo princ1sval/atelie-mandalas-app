@@ -5,6 +5,9 @@ export const ATELIE_MOCK: Atelie = {
   nome: 'Malu Mandalas',
   instagram: '@malu.mandalas',
   whatsapp: '553287103005', // WhatsApp do ateliê, (32) 8710-3005: 55 + DDD + número, só dígitos
+  // Ponto aproximado da Rua Waldemar Vaz Pereira, no alto do bairro São Pedro, em Muriaé (OpenStreetMap).
+  // Três casas decimais (uns 100 m) bastam para a distância e não expõem o endereço exato (seção 7.3).
+  coordenadas: { latitude: -21.125, longitude: -42.362 },
   slogan: 'mandalas artesanais em pontilhismo, criadas com delicadeza e significado.',
   boasVindas: 'é um prazer ter você aqui!',
   historia: {

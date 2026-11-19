@@ -76,6 +76,10 @@ async function salvar(novo: Perfil, anterior: Perfil): Promise<Perfil> {
   const fotoUri = fotoMudou && novo.fotoUri ? await fotoRepository.guardar(novo.fotoUri) : novo.fotoUri;
 
   const perfil: Perfil = { ...novo, nome: novo.nome.trim(), fotoUri };
+  // A cidade é opcional: vazia, ela nem é guardada (seção 7.3).
+  const cidade = novo.cidade?.trim();
+  if (cidade) perfil.cidade = cidade;
+  else delete perfil.cidade;
   await perfilRepository.salvar(perfil);
 
   if (fotoMudou && anterior.fotoUri) fotoRepository.apagar(anterior.fotoUri);

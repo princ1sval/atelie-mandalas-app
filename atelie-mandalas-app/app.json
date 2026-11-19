@@ -32,6 +32,15 @@
           "photosPermission": "O Malu Mandalas abre a sua galeria para você escolher a foto do seu perfil.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Malu Mandalas usa a sua localização só para preencher a cidade do perfil e mostrar a distância até o ateliê.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
+        }
       ]
     ]
   }
