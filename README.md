@@ -171,7 +171,7 @@ Seguindo o material **18 – Persistência**, cada dado fica no lugar que combin
 
 O app também abre no navegador (tecla `w` no `npx expo start`). O `metro.config.js` permite o SQLite na web, que roda em WebAssembly e precisa de dois cabeçalhos de segurança. O que muda em relação ao celular:
 
-- ao iniciar o app, a primeira abertura do banco passa do tempo-limite do `expo-sqlite` e aparece um erro no console; a chamada seguinte abre o banco normalmente;
+- ao iniciar o app, a primeira abertura do banco falha porque o worker do `expo-sqlite` ainda está carregando, e aparece um erro no console; a chamada seguinte abre o banco normalmente;
 - o banco do navegador não usa WAL (`journal_mode=delete`);
 - os dados ficam no armazenamento do navegador, separados dos do celular;
 - as confirmações usam o `confirm` do navegador, porque o `Alert` do React Native não funciona na web.
