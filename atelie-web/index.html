@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <!-- ABERTURA, trecho 1 — decide, antes do primeiro paint, se a animação roda (igual ao psico-web:
+       roda em toda visita; ?intro força e ?intro=0.25 é câmera lenta) -->
+  <script>
+    (function () {
+      var html = document.documentElement;
+      var forcar = /[?&]intro(?:[=&]|$)/.test(location.search);
+      try {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; // movimento reduzido: nunca roda
+        if (!forcar) {
+          if (location.hash) return;                         // chegou por link de seção (#duvidas…)
+          if (document.visibilityState === 'hidden') return; // aberta em aba de fundo
+        }
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; // começa no topo
+        html.classList.add('intro');
+      } catch (e) { /* navegador sem suporte: não roda */ }
+    })();
+  </script>
+  <!-- ABERTURA, trecho 2 — fonte do nome pré-carregada + CSS da camada (inline, antes de qualquer CSS externo) -->
+  <link rel="preload" href="assets/fonts/fraunces-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+  :root {
+    --ab-cortina: #F5F1E3;   /* cor da cortina (creme do app) */
+    --ab-pontilho: #8E9C78;  /* pontinhos da borda do círculo que abre (sálvia) */
+    --ab-nome: #2E3127;      /* cor do nome */
+    --ab-fonte-nome: "Fraunces", Georgia, "Times New Roman", serif;
+    --ab-tamanho-nome: clamp(2.2rem, 1.6rem + 3vw, 4rem);
+    --ab-espera: 4s;         /* rede de segurança: se o JS falhar, a camada some sozinha depois disso */
+  }
+
+  /* Cores dos pontos da mandala: servem para o logo do menu e para a mandala da abertura */
+  .ml-centro, .ml-a3 { fill: #5A3A2B; }
+  .ml-a1, .ml-x1 { fill: #8E9C78; }
+  .ml-a2, .ml-x2 { fill: #56634A; }
+
+  #abertura { display: none; }
+
+  html.intro #abertura {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    overflow: hidden;
+    contain: strict;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    animation: ab-seguranca .35s linear var(--ab-espera) forwards;
+  }
+  #abertura svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+  .ab-cortina { fill: var(--ab-cortina); fill-rule: evenodd; }
+  .ab-borda { fill: none; stroke: var(--ab-pontilho); stroke-width: 3.5px; stroke-linecap: round; opacity: 0; }
+  .ab-nome {
+    fill: var(--ab-nome);
+    font-family: var(--ab-fonte-nome);
+    font-weight: 300;
+    font-size: var(--ab-tamanho-nome);
+    letter-spacing: -.01em;
+    opacity: 0;
+  }
+  .ab-mandala { will-change: transform; }
+
+  /* O logo do menu já ocupa o lugar, invisível, até a mandala pousar nele */
+  html.intro [data-abertura-logo] {
+    visibility: hidden;
+    animation: ab-logo-volta .35s ease-out var(--ab-espera) forwards;
+  }
+  @keyframes ab-seguranca {
+    0%   { opacity: 1; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+    96%  { opacity: 0; visibility: visible; }
+    97%, 100% { opacity: 0; visibility: hidden; pointer-events: none; }
+  }
+  @keyframes ab-logo-volta {
+    from { visibility: visible; opacity: 0; }
+    to   { visibility: visible; opacity: 1; }
+  }
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Malu Mandalas · Mandalas artesanais em pontilhismo</title>
+  <meta name="description" content="Mandalas pintadas à mão, ponto a ponto, no ateliê Malu Mandalas, em Muriaé-MG. Peças de pronta entrega e encomendas personalizadas para família, pets, casais e homenagens. Enviamos para todo o Brasil.">
+  <meta name="theme-color" content="#F5F1E3">
+  <!-- Site de portfólio: imagens e preços ainda são provisórios. Tirar o noindex quando o ateliê aprovar. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://atelie-web.jp-princisval.workers.dev/">
+  <link rel="preload" href="assets/fonts/poppins-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Compartilhamento (WhatsApp, Instagram, redes) -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Malu Mandalas">
+  <meta property="og:title" content="Malu Mandalas · Mandalas artesanais em pontilhismo">
+  <meta property="og:description" content="Pintadas à mão, ponto a ponto. Pronta entrega e encomendas personalizadas.">
+  <meta property="og:url" content="https://atelie-web.jp-princisval.workers.dev/">
+  <meta property="og:image" content="https://atelie-web.jp-princisval.workers.dev/assets/img/compartilhar.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Malu Mandalas: mandala Sol e Lua pintada em pontilhismo sobre fundo verde-sálvia">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/secoes.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "Malu Mandalas",
+    "description": "Ateliê de mandalas artesanais pintadas à mão na técnica de pontilhismo. Peças de pronta entrega e encomendas personalizadas.",
+    "url": "https://atelie-web.jp-princisval.workers.dev/",
+    "image": "https://atelie-web.jp-princisval.workers.dev/assets/img/compartilhar.jpg",
+    "logo": "https://atelie-web.jp-princisval.workers.dev/apple-touch-icon.png",
+    "telephone": "+55 32 8710-3005",
+    "address": { "@type": "PostalAddress", "addressLocality": "Muriaé", "addressRegion": "MG", "addressCountry": "BR" },
+    "areaServed": "BR",
+    "sameAs": ["https://www.instagram.com/malu.mandalas"]
+  }
+  </script>
+</head>
+<body>
+  <!-- ABERTURA, trecho 3 — camada por cima do site (primeira coisa do <body>) -->
+  <div id="abertura" aria-hidden="true">
+    <svg focusable="false">
+      <rect class="ab-cortina ab-inicial" width="100%" height="100%"/>
+      <path class="ab-cortina" data-cortina/>
+      <circle class="ab-borda" r="0"/>
+      <text class="ab-nome" text-anchor="middle" dominant-baseline="central">Malu Mandalas</text>
+      <g class="ab-mandala" transform="translate(-999 -999)"></g>
+    </svg>
+  </div>
+
+  <!-- Ícones (traço, no estilo Feather do app) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-whats" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></symbol>
+    <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+    <symbol id="i-fechar" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-compartilhar" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></symbol>
+    <symbol id="i-sortear" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+    <symbol id="i-estrela" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+    <symbol id="i-centro" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-circulo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></symbol>
+    <symbol id="i-ponto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+    <symbol id="i-local" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-envio" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+    <symbol id="i-presente" viewBox="0 0 24 24"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+    <symbol id="i-repetir" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  </svg>
+
+  <a class="pular-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <!-- MENU — data-menu no <header>; data-menu-flip nas peças que deslizam;
+       data-abertura-logo no SVG onde a mandala pousa; data-abertura-sobe no que sobe quando a cortina abre -->
+  <header class="menu" data-menu>
+    <div class="menu__contorno" aria-hidden="true"></div>
+    <div class="menu__fundo" aria-hidden="true"></div>
+    <div class="menu__barra">
+      <a class="menu__marca" href="#inicio" data-menu-flip aria-label="Malu Mandalas, início">
+        <svg class="menu__logo" data-abertura-logo viewBox="0 0 100 100" overflow="visible" aria-hidden="true" focusable="false">
+          <circle class="ml-centro" cx="50" cy="50" r="7"/>
+          <circle class="ml-a1" cx="50" cy="34" r="3.6"/><circle class="ml-a1" cx="61.31" cy="38.69" r="3.6"/><circle class="ml-a1" cx="66" cy="50" r="3.6"/><circle class="ml-a1" cx="61.31" cy="61.31" r="3.6"/><circle class="ml-a1" cx="50" cy="66" r="3.6"/><circle class="ml-a1" cx="38.69" cy="61.31" r="3.6"/><circle class="ml-a1" cx="34" cy="50" r="3.6"/><circle class="ml-a1" cx="38.69" cy="38.69" r="3.6"/>
+          <circle class="ml-a2" cx="60.91" cy="23.67" r="5.4"/><circle class="ml-a2" cx="76.33" cy="39.09" r="5.4"/><circle class="ml-a2" cx="76.33" cy="60.91" r="5.4"/><circle class="ml-a2" cx="60.91" cy="76.33" r="5.4"/><circle class="ml-a2" cx="39.09" cy="76.33" r="5.4"/><circle class="ml-a2" cx="23.67" cy="60.91" r="5.4"/><circle class="ml-a2" cx="23.67" cy="39.09" r="5.4"/><circle class="ml-a2" cx="39.09" cy="23.67" r="5.4"/>
+          <circle class="ml-a3" cx="50" cy="8" r="2.7"/><circle class="ml-a3" cx="66.07" cy="11.2" r="2.7"/><circle class="ml-a3" cx="79.7" cy="20.3" r="2.7"/><circle class="ml-a3" cx="88.8" cy="33.93" r="2.7"/><circle class="ml-a3" cx="92" cy="50" r="2.7"/><circle class="ml-a3" cx="88.8" cy="66.07" r="2.7"/><circle class="ml-a3" cx="79.7" cy="79.7" r="2.7"/><circle class="ml-a3" cx="66.07" cy="88.8" r="2.7"/><circle class="ml-a3" cx="50" cy="92" r="2.7"/><circle class="ml-a3" cx="33.93" cy="88.8" r="2.7"/><circle class="ml-a3" cx="20.3" cy="79.7" r="2.7"/><circle class="ml-a3" cx="11.2" cy="66.07" r="2.7"/><circle class="ml-a3" cx="8" cy="50" r="2.7"/><circle class="ml-a3" cx="11.2" cy="33.93" r="2.7"/><circle class="ml-a3" cx="20.3" cy="20.3" r="2.7"/><circle class="ml-a3" cx="33.93" cy="11.2" r="2.7"/>
+        </svg>
+        <span class="menu__nome" data-abertura-sobe>Malu Mandalas</span>
+      </a>
+      <div class="menu__direita" data-menu-flip="fim">
+        <nav class="menu__links" aria-label="Seções" data-abertura-sobe>
+          <a href="#pronta-entrega">Pronta entrega</a>
+          <a href="#portfolio">Portfólio</a>
+          <a href="#encomenda">Encomenda</a>
+          <a href="#duvidas">Dúvidas</a>
+        </nav>
+        <a class="menu__whats" href="https://wa.me/553287103005?text=Ol%C3%A1%2C%20Malu!%20Vim%20pelo%20site%20e%20queria%20conversar%20sobre%20as%20mandalas." target="_blank" rel="noopener" data-abertura-sobe>
+          <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-whats"/></svg>
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="conteudo" tabindex="-1">
+
+    <!-- ===================== INÍCIO ===================== -->
+    <section id="inicio" class="inicio" aria-labelledby="inicio-titulo">
+      <div class="container">
+        <div class="inicio__cartao">
+          <img class="inicio__decoracao" src="assets/img/mandalas/mandala-decorativa-800.webp" width="800" height="800" alt="" aria-hidden="true" decoding="async">
+          <div class="inicio__texto">
+            <p class="inicio__boas-vindas" data-abertura-sobe>seja bem-vindo ao</p>
+            <p class="inicio__atelie" data-abertura-sobe>Ateliê</p>
+            <h1 id="inicio-titulo" class="logotipo" data-abertura-sobe>
+              <span class="visualmente-oculto">Malu Mandalas</span>
+              <span class="logotipo__m" aria-hidden="true">M</span>
+              <span class="logotipo__resto" aria-hidden="true"><span>alu</span><span>andalas</span></span>
+            </h1>
+            <p class="inicio__slogan" data-abertura-sobe>mandalas artesanais em pontilhismo, criadas com delicadeza e significado.</p>
+            <p class="inicio__prazer" data-abertura-sobe>é um prazer ter você aqui!</p>
+            <div class="inicio__botoes" data-abertura-sobe>
+              <a class="botao botao--claro" href="#pronta-entrega">Ver pronta entrega</a>
+              <a class="botao botao--contorno-claro" href="#encomenda">Encomendar a sua</a>
+            </div>
+          </div>
+          <figure class="inicio__peca" data-abertura-sobe>
+            <div class="inicio__moldura">
+              <img src="assets/img/mandalas/sol-e-lua-800.webp" srcset="assets/img/mandalas/sol-e-lua-400.webp 400w, assets/img/mandalas/sol-e-lua-800.webp 800w" sizes="(min-width: 960px) 420px, 70vw" width="800" height="800" fetchpriority="high" alt="Mandala Sol e Lua: sol amarelo e laranja e pequenas flores cinzas sobre fundo preto">
+            </div>
+            <figcaption><span>Sol e Lua</span> · pronta entrega</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== NOSSA HISTÓRIA ===================== -->
+    <section id="historia" class="secao historia" aria-labelledby="historia-titulo">
+      <div class="container historia__grade">
+        <div class="fluxo" data-revela>
+          <p class="sobretitulo">Nossa história</p>
+          <h2 id="historia-titulo">Uma criança que nunca <em>parou de criar</em></h2>
+          <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+          <p>Desde pequena, a Malu vivia entre lápis, tintas e papel. A menina cresceu, mas continua aqui: é ela quem escolhe cada cor e pinta, ponto a ponto, as mandalas do ateliê.</p>
+        </div>
+        <figure class="citacao" data-revela>
+          <svg class="citacao__estrela" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-estrela"/></svg>
+          <blockquote>
+            <p>o criativo é uma criança que insistiu</p>
+          </blockquote>
+          <figcaption>e há muito dela dentro de mim</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNIFICADO ===================== -->
+    <section id="significado" class="secao secao--superficie significado" aria-labelledby="significado-titulo">
+      <div class="container">
+        <div class="fluxo significado__cabeca" data-revela>
+          <p class="sobretitulo">Significado</p>
+          <h2 id="significado-titulo">O que é uma <em>mandala</em>?</h2>
+          <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+          <p>Mandala vem do sânscrito e quer dizer "círculo". Tudo nasce de um ponto central e se expande em harmonia, por isso ela é usada há séculos como símbolo de equilíbrio, foco e proteção.</p>
+        </div>
+        <ul class="simbolos" role="list">
+          <li class="simbolo" data-revela>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-centro"/></svg>
+            <h3>Centro</h3>
+            <p>onde tudo começa</p>
+          </li>
+          <li class="simbolo" data-revela>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-circulo"/></svg>
+            <h3>Círculo</h3>
+            <p>unidade e ciclos da vida</p>
+          </li>
+          <li class="simbolo" data-revela>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><use href="#i-ponto"/></svg>
+            <h3>Ponto</h3>
+            <p>a técnica, um de cada vez</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== A TÉCNICA (pontilhismo ao vivo) ===================== -->
+    <section id="tecnica" class="secao tecnica" aria-labelledby="tecnica-titulo">
+      <div class="container tecnica__grade">
+        <div class="tecnica__tela" data-revela>
+          <!-- desenhada pelo site.js: cada ponto aparece na ordem em que seria pintado -->
+          <svg class="pontilhismo" viewBox="0 0 400 400" role="img" aria-label="Uma mandala sendo pintada ponto a ponto, do centro para fora" data-pontilhismo></svg>
+          <p class="tecnica__contador" aria-hidden="true"><strong data-contador>0</strong> pontos</p>
+        </div>
+        <div class="fluxo" data-revela>
+          <p class="sobretitulo">A técnica</p>
+          <h2 id="tecnica-titulo"><em>Pontilhismo</em></h2>
+          <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+          <p>Cada peça é pintada à mão, ponto a ponto. Nenhuma sai igual à outra.</p>
+          <p class="tecnica__nota">Como na mandala aqui ao lado, tudo começa no ponto central e cresce, anel por anel, até fechar o círculo.</p>
+          <p class="tecnica__acoes">
+            <button class="botao botao--contorno botao--pequeno" type="button" data-pintar-de-novo>
+              <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-repetir"/></svg>
+              Pintar de novo
+            </button>
+            <a class="link-seta" href="#portfolio">Ver o portfólio <span aria-hidden="true">→</span></a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRONTA ENTREGA ===================== -->
+    <section id="pronta-entrega" class="secao secao--superficie catalogo" aria-labelledby="pronta-titulo">
+      <div class="container">
+        <div class="catalogo__cabeca">
+          <div class="fluxo" data-revela>
+            <p class="sobretitulo">Pronta entrega</p>
+            <h2 id="pronta-titulo">Peças prontas para <em>ir com você</em></h2>
+            <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+            <p>Estilos já definidos, pintados e esperando um cantinho na sua casa. Toque numa peça para ver os detalhes.</p>
+          </div>
+          <div class="catalogo__ferramentas" data-revela>
+            <label class="campo-busca">
+              <span class="visualmente-oculto">Buscar por nome ou cor</span>
+              <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-busca"/></svg>
+              <input type="search" placeholder="Buscar por nome ou cor" autocomplete="off" data-busca-pronta>
+            </label>
+            <button class="botao botao--contorno botao--pequeno" type="button" data-sortear>
+              <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sortear"/></svg>
+              Me surpreenda
+            </button>
+          </div>
+        </div>
+        <ul class="grade-mandalas" role="list" data-grade="prontaEntrega" aria-live="polite"></ul>
+        <p class="catalogo__vazio" data-vazio="prontaEntrega" hidden>Nenhuma peça com esse nome ou cor. Que tal <a href="#encomenda">encomendar a sua</a>?</p>
+        <noscript><p class="catalogo__vazio">Para ver as peças, ative o JavaScript ou chame a Malu no <a href="https://wa.me/553287103005">WhatsApp</a>.</p></noscript>
+      </div>
+    </section>
+
+    <!-- ===================== PORTFÓLIO ===================== -->
+    <section id="portfolio" class="secao catalogo" aria-labelledby="portfolio-titulo">
+      <div class="container">
+        <div class="catalogo__cabeca">
+          <div class="fluxo" data-revela>
+            <p class="sobretitulo">Portfólio</p>
+            <h2 id="portfolio-titulo">Histórias que <em>viraram mandala</em></h2>
+            <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+            <p>Encomendas já entregues, cada uma feita a partir da história de quem pediu. Gostou de alguma? Peça uma assim.</p>
+          </div>
+          <div class="chips" role="group" aria-label="Filtrar por tema" data-filtros data-revela></div>
+        </div>
+        <ul class="grade-mandalas" role="list" data-grade="encomenda" aria-live="polite"></ul>
+        <p class="catalogo__vazio" data-vazio="encomenda" hidden>Ainda não há peças com esse tema. A sua pode ser a primeira!</p>
+      </div>
+    </section>
+
+    <!-- ===================== ENCOMENDA ===================== -->
+    <section id="encomenda" class="secao secao--salvia encomenda" aria-labelledby="encomenda-titulo">
+      <div class="container">
+        <div class="fluxo encomenda__cabeca" data-revela>
+          <p class="sobretitulo">Encomenda</p>
+          <h2 id="encomenda-titulo">Conte a sua história, <em>a Malu pinta</em></h2>
+          <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+          <p>Família, pet, casal, uma homenagem… Preencha o que já sabe e veja a estimativa na hora. O pedido segue pelo WhatsApp, e a Malu confirma tudo com você antes de começar.</p>
+        </div>
+
+        <form class="encomenda__grade" novalidate data-form-encomenda>
+          <div class="encomenda__campos" data-revela>
+            <div class="campo" data-campo="nome">
+              <label for="enc-nome">Seu nome</label>
+              <input id="enc-nome" name="nome" type="text" autocomplete="name" aria-describedby="enc-nome-erro" required>
+              <p class="campo__erro" id="enc-nome-erro" hidden></p>
+            </div>
+
+            <fieldset class="campo" data-campo="tema" aria-describedby="enc-tema-erro">
+              <legend>Tema</legend>
+              <div class="chips" data-temas-form></div>
+              <p class="campo__erro" id="enc-tema-erro" hidden></p>
+            </fieldset>
+
+            <p class="inspiracao" data-inspiracao hidden>
+              <img src="" alt="" width="400" height="400" data-inspiracao-img>
+              <span>Inspirada em <strong data-inspiracao-nome></strong></span>
+              <button type="button" class="inspiracao__tirar" data-inspiracao-tirar aria-label="Tirar a inspiração">
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-fechar"/></svg>
+              </button>
+            </p>
+
+            <fieldset class="campo" data-campo="tamanho">
+              <legend>Tamanho (diâmetro)</legend>
+              <div class="chips" data-tamanhos-form></div>
+            </fieldset>
+
+            <div class="campo" data-campo="cores">
+              <label for="enc-cores">Cores preferidas <span class="campo__opcional">(opcional)</span></label>
+              <input id="enc-cores" name="cores" type="text" placeholder="Ex.: verde, creme e dourado" autocomplete="off">
+            </div>
+
+            <div class="campo" data-campo="ideia">
+              <label for="enc-ideia">Sua ideia</label>
+              <textarea id="enc-ideia" name="ideia" rows="5" maxlength="500" placeholder="Para quem é, o que ela representa, alguma lembrança especial…" aria-describedby="enc-ideia-contador enc-ideia-erro" required></textarea>
+              <p class="campo__ajuda"><span id="enc-ideia-contador" data-contador-ideia>0/500</span></p>
+              <p class="campo__erro" id="enc-ideia-erro" hidden></p>
+            </div>
+
+            <label class="interruptor">
+              <input type="checkbox" name="presente" data-presente>
+              <span class="interruptor__trilho" aria-hidden="true"></span>
+              <span class="interruptor__texto">
+                <strong>É para presente</strong>
+                <small>Embalagem especial com cartão (+ R$ 15)</small>
+              </span>
+            </label>
+          </div>
+
+          <aside class="estimativa" aria-labelledby="estimativa-titulo" data-revela>
+            <div class="estimativa__caixa">
+              <p class="sobretitulo" id="estimativa-titulo">Estimativa</p>
+              <p class="estimativa__preco" aria-live="polite" data-estimativa-preco>R$ 235 a R$ 305</p>
+              <p class="estimativa__prazo" aria-live="polite" data-estimativa-prazo>pronta em cerca de 20 dias</p>
+              <ul class="estimativa__resumo" role="list" data-resumo></ul>
+              <button class="botao estimativa__enviar" type="submit">
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-whats"/></svg>
+                Enviar pelo WhatsApp
+              </button>
+              <p class="estimativa__nota">Valores de referência. O preço final depende dos detalhes e é combinado com você.</p>
+              <p class="estimativa__privacidade">Nada fica guardado neste site: o pedido vai direto para o WhatsApp do ateliê.</p>
+              <p class="estimativa__ok" role="status" data-enviado hidden></p>
+            </div>
+          </aside>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================== DÚVIDAS ===================== -->
+    <section id="duvidas" class="secao duvidas" aria-labelledby="duvidas-titulo">
+      <div class="container duvidas__grade">
+        <div class="fluxo duvidas__cabeca" data-revela>
+          <p class="sobretitulo">Dúvidas</p>
+          <h2 id="duvidas-titulo">Ficou alguma <em>dúvida</em>?</h2>
+          <div class="pontinhos" aria-hidden="true"><span></span><span></span></div>
+          <p>As perguntas que mais chegam no ateliê. Não achou a sua? É só chamar.</p>
+          <label class="campo-busca">
+            <span class="visualmente-oculto">Buscar nas dúvidas</span>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-busca"/></svg>
+            <input type="search" placeholder="Buscar nas dúvidas" autocomplete="off" data-busca-faq>
+          </label>
+        </div>
+
+        <div class="faq" data-faq>
+          <div class="faq__grupo" data-revela>
+            <h3>Encomendas</h3>
+            <details>
+              <summary>Quanto tempo leva uma encomenda?</summary>
+              <p>Depende do tamanho e dos detalhes da peça. No formulário de encomenda você já vê uma estimativa de prazo, e a Malu confirma tudo com você antes de começar.</p>
+            </details>
+            <details>
+              <summary>Posso mandar uma foto como referência?</summary>
+              <p>Pode e deve! Fotos ajudam a entender cores e detalhes. Depois de enviar o pedido, é só mandar as imagens pelo WhatsApp.</p>
+            </details>
+            <details>
+              <summary>Dá para escolher as cores?</summary>
+              <p>Sim. No pedido tem um campo para as cores preferidas, e a paleta final é combinada com você antes da pintura.</p>
+            </details>
+          </div>
+          <div class="faq__grupo" data-revela>
+            <h3>Pagamento e envio</h3>
+            <details>
+              <summary>Quais são as formas de pagamento?</summary>
+              <p>Pix ou cartão. Os detalhes do pagamento são combinados pelo WhatsApp.</p>
+            </details>
+            <details>
+              <summary>Vocês enviam para outras cidades?</summary>
+              <p>Sim, enviamos para todo o Brasil com embalagem reforçada. Também dá para combinar a retirada da peça.</p>
+            </details>
+          </div>
+          <div class="faq__grupo" data-revela>
+            <h3>Cuidados com a peça</h3>
+            <details>
+              <summary>Como limpar minha mandala?</summary>
+              <p>Use um pano macio e seco ou um espanador. Evite água e produtos de limpeza, que podem tirar o brilho da tinta.</p>
+            </details>
+            <details>
+              <summary>Posso deixar a peça pegando sol?</summary>
+              <p>O ideal é evitar sol direto e umidade: com o tempo, a luz forte desbota as cores.</p>
+            </details>
+          </div>
+          <p class="faq__vazio" data-faq-vazio hidden>Nenhuma pergunta com essas palavras. Pergunte direto para a Malu no <a href="https://wa.me/553287103005?text=Ol%C3%A1%2C%20Malu!%20Vim%20pelo%20site%20e%20tenho%20uma%20d%C3%BAvida." target="_blank" rel="noopener">WhatsApp</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTATO ===================== -->
+    <section id="contato" class="secao contato" aria-labelledby="contato-titulo">
+      <div class="container">
+        <div class="contato__cartao" data-revela>
+          <img class="contato__decoracao" src="assets/img/mandalas/mandala-decorativa-400.webp" width="400" height="400" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          <div class="fluxo contato__texto">
+            <p class="sobretitulo">Contato</p>
+            <h2 id="contato-titulo">Vamos criar <em>a sua</em>?</h2>
+            <p>Chama no WhatsApp para tirar dúvidas, reservar uma peça ou começar a sua encomenda.</p>
+            <div class="contato__botoes">
+              <a class="botao botao--claro" href="https://wa.me/553287103005?text=Ol%C3%A1%2C%20Malu!%20Vim%20pelo%20site%20e%20queria%20conversar%20sobre%20as%20mandalas." target="_blank" rel="noopener">
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-whats"/></svg>
+                (32) 8710-3005
+              </a>
+              <a class="botao botao--contorno-claro" href="https://www.instagram.com/malu.mandalas" target="_blank" rel="noopener">
+                <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-instagram"/></svg>
+                @malu.mandalas
+              </a>
+            </div>
+            <ul class="contato__info" role="list">
+              <li><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-local"/></svg> Ateliê em Muriaé-MG</li>
+              <li><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-envio"/></svg> Enviamos para todo o Brasil</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== RODAPÉ ===================== -->
+  <footer class="rodape">
+    <div class="container rodape__grade">
+      <div class="rodape__marca">
+        <svg class="rodape__logo" viewBox="0 0 100 100" aria-hidden="true" focusable="false" data-copia-logo></svg>
+        <div>
+          <p class="rodape__nome">Malu Mandalas</p>
+          <p>Mandalas artesanais em pontilhismo</p>
+        </div>
+      </div>
+      <nav class="rodape__links" aria-label="Rodapé">
+        <a href="#pronta-entrega">Pronta entrega</a>
+        <a href="#portfolio">Portfólio</a>
+        <a href="#encomenda">Encomenda</a>
+        <a href="#duvidas">Dúvidas</a>
+        <a href="https://www.instagram.com/malu.mandalas" target="_blank" rel="noopener">Instagram</a>
+      </nav>
+      <p class="rodape__legal"><small>© <span data-ano>2026</span> Malu Mandalas · Muriaé-MG</small></p>
+      <p class="rodape__credito"><small>Site por <a href="https://princisval.com.br" target="_blank" rel="noopener">Princípio Web</a></small></p>
+    </div>
+  </footer>
+
+  <!-- DETALHE DA MANDALA (janela) -->
+  <dialog class="detalhe" aria-labelledby="detalhe-nome" data-detalhe>
+    <div class="detalhe__caixa">
+      <button class="detalhe__fechar" type="button" aria-label="Fechar" data-fechar>
+        <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-fechar"/></svg>
+      </button>
+      <div class="detalhe__imagem">
+        <img src="" alt="" width="800" height="800" data-detalhe-img>
+      </div>
+      <div class="detalhe__texto">
+        <p class="sobretitulo" data-detalhe-origem></p>
+        <h2 id="detalhe-nome" data-detalhe-nome></h2>
+        <p class="detalhe__subtitulo" data-detalhe-subtitulo></p>
+        <p data-detalhe-descricao></p>
+        <dl class="detalhe__ficha">
+          <div><dt>Técnica</dt><dd data-detalhe-tecnica></dd></div>
+          <div><dt>Base</dt><dd data-detalhe-base></dd></div>
+          <div><dt>Tamanho</dt><dd data-detalhe-tamanho></dd></div>
+          <div data-detalhe-preco-linha><dt>Preço</dt><dd class="detalhe__preco" data-detalhe-preco></dd></div>
+        </dl>
+        <div class="detalhe__acoes">
+          <a class="botao" href="#" data-detalhe-acao></a>
+          <button class="botao botao--contorno" type="button" data-compartilhar>
+            <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-compartilhar"/></svg>
+            <span data-compartilhar-texto>Compartilhar</span>
+          </button>
+        </div>
+        <p class="detalhe__ajuda" data-detalhe-ajuda></p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ABERTURA e MENU (nesta ordem), depois os dados e o resto do site -->
+  <script src="js/abertura.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

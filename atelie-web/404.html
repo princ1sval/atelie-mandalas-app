@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Página não encontrada · Malu Mandalas</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#F5F1E3">
+  <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    .perdida {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: var(--esp-6) var(--respiro-lateral);
+      text-align: center;
+    }
+    .perdida__caixa { display: grid; justify-items: center; gap: var(--esp-4); max-width: 34rem; }
+    .perdida__mandala { width: 120px; height: 120px; animation: girar 40s linear infinite; }
+    .perdida__mandala circle:nth-child(odd) { fill: var(--cor-salvia); }
+    .perdida__mandala circle:nth-child(even) { fill: var(--cor-salvia-escura); }
+    .perdida__mandala .solta { fill: var(--cor-marrom) !important; }
+    .perdida h1 { font-size: var(--fs-h2); }
+    .perdida p { color: var(--cor-texto-suave); }
+    .perdida .botao { margin-top: var(--esp-4); }
+    @keyframes girar { to { rotate: 360deg; } }
+  </style>
+</head>
+<body>
+  <main class="perdida">
+    <div class="perdida__caixa">
+      <!-- a mandala com um ponto fora do lugar -->
+      <svg class="perdida__mandala" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <circle cx="50" cy="31" r="5"/><circle cx="63.44" cy="36.56" r="5"/><circle cx="69" cy="50" r="5"/><circle cx="63.44" cy="63.44" r="5"/><circle cx="50" cy="69" r="5"/><circle cx="36.56" cy="63.44" r="5"/><circle cx="31" cy="50" r="5"/><circle cx="36.56" cy="36.56" r="5"/>
+        <circle cx="62.63" cy="19.51" r="7"/><circle cx="80.49" cy="37.37" r="7"/><circle cx="80.49" cy="62.63" r="7"/><circle cx="62.63" cy="80.49" r="7"/><circle cx="37.37" cy="80.49" r="7"/><circle cx="19.51" cy="62.63" r="7"/><circle cx="19.51" cy="37.37" r="7"/>
+        <circle class="solta" cx="92" cy="8" r="7"/>
+      </svg>
+      <p class="sobretitulo">Erro 404</p>
+      <h1>Um ponto saiu do lugar</h1>
+      <p>A página que você procurou não existe ou mudou de endereço. As mandalas continuam todas lá no começo.</p>
+      <a class="botao" href="/">Voltar ao ateliê</a>
+    </div>
+  </main>
+</body>
+</html>

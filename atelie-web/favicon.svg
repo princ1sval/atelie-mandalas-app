@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    .c { fill: #5A3A2B; } .a1 { fill: #8E9C78; } .a2 { fill: #56634A; }
+    @media (prefers-color-scheme: dark) { .c { fill: #F2E3A0; } .a1 { fill: #DCE3CF; } .a2 { fill: #8E9C78; } }
+  </style>
+  <circle class="c" cx="50" cy="50" r="9"/>
+  <circle class="a1" cx="50" cy="31" r="5"/><circle class="a1" cx="63.44" cy="36.56" r="5"/><circle class="a1" cx="69" cy="50" r="5"/><circle class="a1" cx="63.44" cy="63.44" r="5"/><circle class="a1" cx="50" cy="69" r="5"/><circle class="a1" cx="36.56" cy="63.44" r="5"/><circle class="a1" cx="31" cy="50" r="5"/><circle class="a1" cx="36.56" cy="36.56" r="5"/>
+  <circle class="a2" cx="62.63" cy="19.51" r="7"/><circle class="a2" cx="80.49" cy="37.37" r="7"/><circle class="a2" cx="80.49" cy="62.63" r="7"/><circle class="a2" cx="62.63" cy="80.49" r="7"/><circle class="a2" cx="37.37" cy="80.49" r="7"/><circle class="a2" cx="19.51" cy="62.63" r="7"/><circle class="a2" cx="19.51" cy="37.37" r="7"/><circle class="a2" cx="37.37" cy="19.51" r="7"/>
+</svg>

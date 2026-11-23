@@ -1,0 +1,18 @@
+# Arquivos que NÃO vão para o site publicado (sintaxe do .gitignore)
+# Tudo que não estiver aqui fica público na internet.
+
+# Repositório e configurações
+.git
+.github
+.claude
+.wrangler
+node_modules
+.gitignore
+.gitattributes
+.assetsignore
+wrangler.jsonc
+
+# Documentos internos do projeto
+CLAUDE.md
+docs
+*.md

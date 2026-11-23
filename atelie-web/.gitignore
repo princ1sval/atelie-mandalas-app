@@ -1,0 +1,11 @@
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+
+# Cloudflare (pasta temporária do wrangler)
+.wrangler/

@@ -1,0 +1,7 @@
+# Rastreadores podem ler o site (assim a prévia do link funciona no WhatsApp e no Instagram).
+# Enquanto as imagens e os preços forem provisórios, o index.html tem <meta name="robots" content="noindex">,
+# então o Google não lista a página. Quando o ateliê aprovar, é só tirar o noindex.
+User-agent: *
+Allow: /
+
+Sitemap: https://atelie-web.jp-princisval.workers.dev/sitemap.xml

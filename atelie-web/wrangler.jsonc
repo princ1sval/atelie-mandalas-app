@@ -1,0 +1,11 @@
+// Publicação no Cloudflare (Worker só com arquivos estáticos, sem build), igual ao psico-web.
+// Publica esta pasta, MENOS o que está listado em .assetsignore (docs internos e configurações).
+// Endereço: https://atelie-web.jp-princisval.workers.dev
+{
+  "name": "atelie-web",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "404-page"
+  }
+}

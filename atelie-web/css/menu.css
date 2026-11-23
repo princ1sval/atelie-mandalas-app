@@ -1,0 +1,196 @@
+/* ==========================================================================
+   MENU AO ROLAR — barra cheia no topo, pílula flutuante depois de ~100 px
+   Mesmo kit do site psico-web (medidas e tempos iguais), com as cores do ateliê.
+   ========================================================================== */
+:root {
+  --menu-altura: 76px;                       /* barra cheia */
+  --menu-pilula-altura: 56px;
+  --menu-pilula-topo: 12px;                  /* distância da pílula até o topo */
+  --menu-pilula-largura: min(560px, 100% - 24px);
+  --menu-dur: 420ms;                         /* 350–450 ms */
+  --menu-ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --menu-fundo: rgb(245 241 227 / 0.84);     /* creme translúcido */
+  --menu-fio: rgb(227 220 198 / 0.95);       /* = --cor-borda */
+}
+@media (max-width: 860px) {
+  :root {
+    --menu-altura: 64px;
+    --menu-pilula-altura: 52px;
+    --menu-pilula-largura: calc(100% - 24px); /* celular: quase toda a largura, 12 px de margem */
+  }
+}
+
+.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--menu-altura);
+  pointer-events: none; /* só a pílula/barra recebe clique, não o vazio em volta */
+}
+
+/* Borda + sombra suave da pílula. Fica ATRÁS do fundo translúcido e vai aparecendo
+   conforme a pílula se forma (nunca aparece uma borda "solta" dentro de um fundo maior). */
+.menu__contorno {
+  position: absolute;
+  top: var(--menu-pilula-topo);
+  left: 50%;
+  width: var(--menu-pilula-largura);
+  height: var(--menu-pilula-altura);
+  transform: translateX(-50%);
+  border: 1px solid var(--cor-borda);
+  border-radius: 999px;
+  box-shadow: var(--sombra-suave);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+.menu--pilula .menu__contorno {
+  opacity: 1;
+  transition: opacity 240ms var(--menu-ease) 180ms;
+}
+
+/* Fundo: a mesma peça vira pílula recortando com clip-path (anima na GPU, sem layout) */
+.menu__fundo {
+  position: absolute;
+  inset: 0;
+  background: var(--menu-fundo);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: inset 0 -1px 0 var(--menu-fio); /* fio de baixo da barra cheia */
+  clip-path: inset(0 0 0 0 round 0px);
+  transition: clip-path var(--menu-dur) var(--menu-ease), box-shadow 160ms ease-out;
+}
+.menu--pilula .menu__fundo {
+  box-shadow: inset 0 -1px 0 rgb(227 220 198 / 0);
+  /* 1 px para dentro do contorno, para a borda ficar inteira à vista */
+  clip-path: inset(
+    calc(var(--menu-pilula-topo) + 1px)
+    calc((100% - var(--menu-pilula-largura)) / 2 + 1px)
+    calc(var(--menu-altura) - var(--menu-pilula-topo) - var(--menu-pilula-altura) + 1px)
+    round calc(var(--menu-pilula-altura) / 2 - 1px)
+  );
+}
+
+/* Conteúdo */
+.menu__barra {
+  position: relative;
+  height: var(--menu-altura);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.menu--pilula .menu__barra {
+  width: var(--menu-pilula-largura);
+  max-width: none;
+  height: var(--menu-pilula-altura);
+  margin-top: var(--menu-pilula-topo);
+  padding: 0 7px 0 12px;
+}
+
+.menu__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cor-tinta);
+  text-decoration: none;
+  pointer-events: auto;
+}
+/* Logo: a mandala de pontos (é nele que a mandala da abertura pousa) */
+.menu__logo { width: 34px; height: 34px; flex: none; overflow: visible; }
+.menu__nome {
+  font: 400 19px/1 var(--fonte-titulo);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+/* Links + WhatsApp andam juntos (um grupo só, alinhado à direita) */
+.menu__direita {
+  margin-left: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.menu__links {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  pointer-events: auto;
+  /* voltando ao topo: só aparecem depois que o grupo passou pelo nome */
+  transition: opacity 240ms var(--menu-ease) 180ms, visibility 0s;
+}
+.menu__links a {
+  position: relative;
+  color: rgb(46 49 39 / 0.82);
+  font: 500 13.5px/1 var(--fonte-texto);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .2s;
+}
+/* pontinho que acende embaixo do link da seção em que a pessoa está */
+.menu__links a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 999px;
+  background: var(--cor-marrom);
+  transform: scale(0);
+  transition: transform 300ms var(--ease-pouso);
+}
+.menu__links a:hover { color: var(--cor-marrom); }
+.menu__links a[aria-current="true"] { color: var(--cor-marrom); }
+.menu__links a[aria-current="true"]::after { transform: scale(1); }
+.menu--pilula .menu__links {
+  position: absolute; /* sai do fluxo, mas continua colado à esquerda do WhatsApp */
+  top: 0;
+  bottom: 0;
+  right: calc(100% + 28px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 160ms ease-out, visibility 0s 160ms; /* os links somem com fade */
+}
+
+.menu__whats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--cor-salvia-escura);
+  color: var(--cor-creme-claro);
+  font: 500 13px/1 var(--fonte-texto);
+  letter-spacing: .02em;
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: auto;
+  transition: background-color .2s;
+}
+.menu__whats:hover { background: var(--cor-musgo); }
+.menu__whats svg { width: 16px; height: 16px; }
+
+@media (max-width: 860px) {
+  .menu__barra { padding: 0 16px; }
+  .menu__links { display: none; }
+  .menu__whats { height: 38px; padding: 0 16px; }
+}
+@media (max-width: 359px) {
+  .menu__nome { font-size: 17px; }
+  .menu__whats svg { display: none; }
+}
+
+/* Movimento reduzido: troca de estado sem animação */
+@media (prefers-reduced-motion: reduce) {
+  .menu__fundo, .menu__contorno, .menu__links { transition: none !important; }
+}
