@@ -41,3 +41,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# relatório de cobertura dos testes (npm run test:coverage)
+coverage/
