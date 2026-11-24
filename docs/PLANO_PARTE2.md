@@ -1,5 +1,7 @@
 # Plano da Parte 2: o que falta para entregar
 
+> **Situação em 24/11/2026: plano executado.** As etapas 2 a 8 e 10 estão nos commits da branch, e o README descreve o resultado (seções Contexto, Recursos nativos e permissões, Persistência e Testes). Faltam só a Etapa 9 (apontamentos da Parte 1, que dependem do retorno do professor) e rodar os fluxos do Maestro num emulador. Os nomes e as contagens finais dos testes estão no README; as tabelas abaixo eram a proposta inicial.
+
 > **Para quem vai executar (eu ou o Claude Code na minha máquina):** siga as etapas **na ordem**, uma por vez.
 > Ao fim de cada etapa: rode o app, rode os testes que já existem e faça **um commit** com a mensagem sugerida.
 > Não pule a explicação de cada decisão: na apresentação o professor pode abrir qualquer arquivo e pedir para explicar.
