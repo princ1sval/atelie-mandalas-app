@@ -40,6 +40,8 @@ export function BotaoPrimario({
       onPress={onPress}
       disabled={inativo}
       accessibilityRole="button"
+      // O nome do botão é o título: sem isso, o leitor de tela leria também o ícone.
+      accessibilityLabel={titulo}
       accessibilityState={{ disabled: inativo, busy: carregando }}
       // O Pressable informa se está sendo pressionado: usamos isso para dar um retorno visual.
       style={({ pressed }) => [
