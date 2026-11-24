@@ -1,0 +1,17 @@
+# Abre o app no Expo Go e espera a tela Início.
+# O app roda no Expo Go (appId host.exp.exponent) e é carregado pelo link do Metro.
+# EXPO_URL pode ser trocado na linha de comando: maestro test -e EXPO_URL=exp://192.168.0.10:8081 e2e/
+appId: host.exp.exponent
+---
+- launchApp:
+    stopApp: true
+- openLink: ${EXPO_URL || 'exp://127.0.0.1:8081'}
+# Na primeira abertura, o Expo Go mostra a apresentação do menu de desenvolvedor.
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Ver pronta entrega"
+    timeout: 90000
