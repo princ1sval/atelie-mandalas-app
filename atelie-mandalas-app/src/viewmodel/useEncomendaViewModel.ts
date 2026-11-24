@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ErrosPedido, PedidoEncomenda, TamanhoEncomenda } from '../model/Encomenda';
 import { Mandala, NOMES_TEMA, TemaEncomenda } from '../model/Mandala';
 import { Perfil } from '../model/Perfil';
 import { EncomendaService, LIMITE_IDEIA, TAMANHOS_ENCOMENDA } from '../services/EncomendaService';
 import { MandalaService } from '../services/MandalaService';
-import { PerfilService } from '../services/PerfilService';
 import { formatarFaixaPreco, formatarTelefone } from '../utils/formatters';
-import { useSessao } from './useSessao';
+import { useSessao } from '../context/SessaoContext';
+import { usePerfil } from '../context/PerfilContext';
 
 export interface OpcaoTema {
   valor: TemaEncomenda;
@@ -53,8 +53,10 @@ export function useEncomendaViewModel(
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
   const [protocolo, setProtocolo] = useState<string | null>(null);
-  const [rascunhoPronto, setRascunhoPronto] = useState(false); // vira true depois de ler o rascunho salvo
-  const [perfil, setPerfil] = useState<Perfil>(PerfilService.criarPerfilVazio); // preenche nome e WhatsApp
+  const [rascunhoLido, setRascunhoLido] = useState(false); // vira true depois de ler o rascunho salvo
+  // O perfil vem do PerfilContext: preenche nome e WhatsApp e acompanha as mudanças feitas na aba Perfil.
+  const { perfil, carregando: carregandoPerfil } = usePerfil();
+  const perfilAnterior = useRef<Perfil | undefined>(undefined); // o perfil antes da última mudança
   const { usuario } = useSessao();
   const [precisaEntrar, setPrecisaEntrar] = useState(false);
 
@@ -84,10 +86,10 @@ export function useEncomendaViewModel(
     setPrecisaEntrar(false);
   }, [limparEmRecebido]);
 
-  // Ao abrir, lê o rascunho salvo (seção 3.1) e depois o perfil, que preenche os campos vazios.
+  // Ao abrir, lê o rascunho salvo (seção 3.1). O perfil entra depois, no efeito seguinte.
   useEffect(() => {
     let ativo = true; // se a tela fechar antes de a leitura terminar, a resposta é ignorada
-    async function lerDadosSalvos() {
+    async function lerRascunho() {
       try {
         const rascunho = await EncomendaService.carregarRascunho();
         if (ativo && rascunho) {
@@ -102,34 +104,26 @@ export function useEncomendaViewModel(
       } catch {
         // Não deu para ler o rascunho: o formulário só começa vazio.
       }
-
-      try {
-        const salvo = await PerfilService.carregar();
-        if (ativo) {
-          setPerfil(salvo);
-          setPedido((atual) => EncomendaService.preencherComPerfil(atual, salvo));
-        }
-      } catch {
-        // Sem perfil, a cliente digita o nome e o WhatsApp.
-      }
-
-      // Só agora o salvamento pode começar. Antes disso, o formulário ainda vazio apagaria o rascunho.
-      if (ativo) setRascunhoPronto(true);
+      if (ativo) setRascunhoLido(true);
     }
-    lerDadosSalvos();
+    lerRascunho();
     return () => {
       ativo = false;
     };
   }, []);
 
-  // A aba fica montada: se o perfil mudar na aba Perfil, o formulário acompanha.
-  // O efeito roda de novo a cada perfil novo, então "perfil" aqui é sempre o anterior à mudança.
+  // O perfil preenche nome e WhatsApp depois do rascunho, porque o rascunho é guardado sem eles
+  // (semDadosDoPerfil). A aba fica montada: se o perfil mudar na aba Perfil, o formulário acompanha.
+  // O ref guarda o perfil anterior, para trocar só o campo que ainda mostrava o valor antigo.
   useEffect(() => {
-    return PerfilService.observar((novo) => {
-      setPedido((atual) => EncomendaService.preencherComPerfil(atual, novo, perfil));
-      setPerfil(novo);
-    });
-  }, [perfil]);
+    if (!rascunhoLido || carregandoPerfil) return;
+    setPedido((atual) => EncomendaService.preencherComPerfil(atual, perfil, perfilAnterior.current));
+    perfilAnterior.current = perfil;
+  }, [perfil, carregandoPerfil, rascunhoLido]);
+
+  // Só depois de ler o rascunho e o perfil o salvamento pode começar.
+  // Antes disso, o formulário ainda vazio apagaria o rascunho.
+  const rascunhoPronto = rascunhoLido && !carregandoPerfil;
 
   // Salva o rascunho 500 ms depois da última alteração, e não a cada letra digitada.
   // Cada alteração cancela a espera anterior: é o clearTimeout do return.

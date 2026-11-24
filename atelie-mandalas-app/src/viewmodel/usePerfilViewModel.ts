@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Perfil } from '../model/Perfil';
 import { ErrosPerfil, PerfilService } from '../services/PerfilService';
 import { ImagemService, ResultadoImagem } from '../services/ImagemService';
 import { LocalizacaoService, ResultadoLocalizacao } from '../services/LocalizacaoService';
 import { AuthService } from '../services/AuthService';
 import { formatarDistancia, formatarTelefone } from '../utils/formatters';
-import { useSessao } from './useSessao';
+import { useSessao } from '../context/SessaoContext';
+import { usePerfil } from '../context/PerfilContext';
 
 export interface PerfilViewModel {
   perfil: Perfil; // como está na tela, ainda sem salvar
@@ -43,12 +44,11 @@ const AVISOS_LOCALIZACAO: Record<Exclude<ResultadoLocalizacao['tipo'], 'ok'>, st
 };
 
 export function usePerfilViewModel(): PerfilViewModel {
-  // Duas cópias do perfil: "salvo" é o que está no aparelho e "perfil" é o que está na tela.
-  // Comparando as duas, o Service sabe se a foto mudou e qual arquivo antigo apagar.
-  const [salvo, setSalvo] = useState<Perfil>(PerfilService.criarPerfilVazio);
-  const [perfil, setPerfil] = useState<Perfil>(PerfilService.criarPerfilVazio);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+  // Duas cópias do perfil: "salvo" é o que está no aparelho e vem do PerfilContext, compartilhado
+  // com as outras abas. "perfil" é o que está na tela, ainda sem salvar: é texto digitado,
+  // estado local de UI, por isso continua num useState e não vai para o contexto.
+  const { perfil: salvo, carregando, erro, recarregar, salvar: salvarNoContexto } = usePerfil();
+  const [perfil, setPerfil] = useState<Perfil>(salvo);
   const [avisoFoto, setAvisoFoto] = useState<string | null>(null);
   const [buscandoCidade, setBuscandoCidade] = useState(false);
   const [avisoCidade, setAvisoCidade] = useState<string | null>(null);
@@ -60,33 +60,24 @@ export function usePerfilViewModel(): PerfilViewModel {
   const { usuario } = useSessao();
   const [avisoConta, setAvisoConta] = useState<string | null>(null);
 
-  const carregar = useCallback(async () => {
-    setCarregando(true);
-    setErro(null);
-    try {
-      const atual = await PerfilService.carregar();
-      setSalvo(atual);
-      setPerfil(atual);
-    } catch {
-      setErro('Não foi possível carregar o seu perfil.');
-    } finally {
-      setCarregando(false);
-    }
-  }, []);
+  // true entre o "Salvar" desta tela e a chegada do perfil novo pelo contexto.
+  // Serve para o efeito abaixo não apagar o "Perfil salvo" que esta própria tela acabou de mostrar.
+  const mudancaFeitaAqui = useRef(false);
 
+  // Quando o perfil salvo muda, a tela passa a mostrá-lo.
+  // Se a mudança veio de outra tela, como o "Apagar meus dados", os avisos antigos também saem.
   useEffect(() => {
-    carregar();
-    // Se o perfil mudar em outra tela, como no "Apagar meus dados", esta tela mostra o novo.
-    return PerfilService.observar((atual) => {
-      setSalvo(atual);
-      setPerfil(atual);
-      setTentouSalvar(false);
-      setSalvoAgora(false);
-      setAvisoFoto(null);
-      setAvisoCidade(null);
-      setDistanciaTexto(null);
-    });
-  }, [carregar]);
+    setPerfil(salvo);
+    if (mudancaFeitaAqui.current) {
+      mudancaFeitaAqui.current = false;
+      return;
+    }
+    setTentouSalvar(false);
+    setSalvoAgora(false);
+    setAvisoFoto(null);
+    setAvisoCidade(null);
+    setDistanciaTexto(null);
+  }, [salvo]);
 
   function alterar(campos: Partial<Perfil>) {
     setPerfil((atual) => ({ ...atual, ...campos }));
@@ -146,13 +137,15 @@ export function usePerfilViewModel(): PerfilViewModel {
     if (PerfilService.temErros(PerfilService.validar(perfil))) return;
 
     setSalvando(true);
+    mudancaFeitaAqui.current = true;
     try {
-      // O Service devolve o perfil com o caminho definitivo da foto, já fora do cache.
-      const atualizado = await PerfilService.salvar(perfil, salvo);
-      setSalvo(atualizado);
+      // O contexto grava pelo Service e devolve o perfil com o caminho definitivo da foto.
+      // Início e Encomenda recebem o perfil novo na hora, pelo mesmo contexto.
+      const atualizado = await salvarNoContexto(perfil);
       setPerfil(atualizado);
       setSalvoAgora(true);
     } catch {
+      mudancaFeitaAqui.current = false; // nada mudou no contexto
       setErroSalvar('Não foi possível salvar o perfil. Tente novamente.');
     } finally {
       setSalvando(false);
@@ -175,7 +168,9 @@ export function usePerfilViewModel(): PerfilViewModel {
     salvoAgora,
     emailDaConta: usuario?.email ?? null,
     avisoConta,
-    recarregar: carregar,
+    recarregar: () => {
+      recarregar();
+    },
     sairDaConta,
     alterarNome: (texto) => alterar({ nome: texto }),
     alterarWhatsapp: (texto) => alterar({ whatsapp: formatarTelefone(texto) }), // máscara enquanto digita

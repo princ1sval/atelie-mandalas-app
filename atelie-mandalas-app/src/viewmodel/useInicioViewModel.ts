@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Atelie } from '../model/Atelie';
-import { Perfil } from '../model/Perfil';
 import { AtelieService } from '../services/AtelieService';
-import { PerfilService } from '../services/PerfilService';
+import { usePerfil } from '../context/PerfilContext';
 import { primeiroNome } from '../utils/texto';
 
 // Saudação do topo da Início, montada com o perfil salvo.
@@ -22,7 +21,8 @@ export interface InicioViewModel {
 
 export function useInicioViewModel(): InicioViewModel {
   const [atelie, setAtelie] = useState<Atelie | null>(null);
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  // O perfil vem do contexto: quando a cliente salva ou apaga em outra aba, a saudação muda junto.
+  const { perfil } = usePerfil();
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -42,17 +42,8 @@ export function useInicioViewModel(): InicioViewModel {
     carregar();
   }, [carregar]);
 
-  // A saudação usa o perfil salvo e muda junto com ele, quando a cliente salva ou apaga.
-  useEffect(() => {
-    PerfilService.carregar()
-      .then((salvo) => setPerfil(salvo))
-      .catch(() => {
-        // Sem perfil, a Início só não mostra a saudação.
-      });
-    return PerfilService.observar((novo) => setPerfil(novo));
-  }, []);
-
-  const saudacao = perfil?.nome
+  // Sem nome salvo, a Início só não mostra a saudação.
+  const saudacao = perfil.nome
     ? { texto: `Olá, ${primeiroNome(perfil.nome)}!`, nome: perfil.nome, fotoUri: perfil.fotoUri }
     : null;
 

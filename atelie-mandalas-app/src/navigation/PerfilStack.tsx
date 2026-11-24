@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { PerfilStackParamList } from './types';
 import { opcoesStack } from './opcoesStack';
-import { useSessao } from '../viewmodel/useSessao';
+import { useSessao } from '../context/SessaoContext';
 import { PerfilScreen } from '../view/screens/PerfilScreen';
 import { EntrarScreen } from '../view/screens/EntrarScreen';
 import { CadastroScreen } from '../view/screens/CadastroScreen';

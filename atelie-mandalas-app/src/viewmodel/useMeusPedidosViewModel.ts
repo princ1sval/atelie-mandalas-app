@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PedidoSalvo } from '../model/Encomenda';
 import { NOMES_TEMA } from '../model/Mandala';
 import { EncomendaService } from '../services/EncomendaService';
+import { usePerfil } from '../context/PerfilContext';
 import { formatarDataHora, formatarFaixaPreco } from '../utils/formatters';
 
 // O que a tela mostra em cada cartão, já em texto.
@@ -51,6 +52,7 @@ export function useMeusPedidosViewModel(): MeusPedidosViewModel {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  const { recarregar: recarregarPerfil } = usePerfil();
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -87,6 +89,9 @@ export function useMeusPedidosViewModel(): MeusPedidosViewModel {
     try {
       await EncomendaService.apagarMeusDados();
       setPedidos([]);
+      // O perfil já saiu do aparelho: o contexto lê de novo, e Início, Encomenda e Perfil
+      // passam a mostrar o perfil vazio.
+      await recarregarPerfil();
       return true;
     } catch {
       setAviso('Não foi possível apagar seus dados. Tente novamente.');

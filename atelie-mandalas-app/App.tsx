@@ -11,6 +11,8 @@ import { Poppins_400Regular } from '@expo-google-fonts/poppins/400Regular';
 import { Poppins_500Medium } from '@expo-google-fonts/poppins/500Medium';
 import { Poppins_600SemiBold } from '@expo-google-fonts/poppins/600SemiBold';
 import { getDb } from './src/db/dbConfig';
+import { SessaoProvider } from './src/context/SessaoContext';
+import { PerfilProvider } from './src/context/PerfilContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { temaNavegacao } from './src/navigation/temaNavegacao';
 import { colors } from './src/view/styles/theme';
@@ -47,10 +49,16 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={temaNavegacao}>
-        <AppNavigator />
-        <StatusBar style="dark" />
-      </NavigationContainer>
+      {/* Contextos por responsabilidade: quem está logado e o perfil salvo (src/context).
+          Ficam por fora da navegação para valer em todas as abas. */}
+      <SessaoProvider>
+        <PerfilProvider>
+          <NavigationContainer theme={temaNavegacao}>
+            <AppNavigator />
+            <StatusBar style="dark" />
+          </NavigationContainer>
+        </PerfilProvider>
+      </SessaoProvider>
     </SafeAreaProvider>
   );
 }
