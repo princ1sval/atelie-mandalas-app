@@ -86,6 +86,9 @@ export function PerfilScreen() {
               ) : null}
 
               {vm.avisoFoto ? <Text style={[styles.erro, styles.centralizado]}>{vm.avisoFoto}</Text> : null}
+              {vm.ajustesFoto ? (
+                <BotaoPrimario titulo="Abrir Ajustes" variante="contorno" icone="settings" onPress={vm.abrirAjustes} />
+              ) : null}
             </>
           ) : (
             // No navegador não há onde guardar o arquivo da foto (ver o ImagemService).
@@ -131,6 +134,9 @@ export function PerfilScreen() {
           ) : null}
           {vm.distanciaTexto ? <Text style={styles.distancia}>{vm.distanciaTexto}</Text> : null}
           {vm.avisoCidade ? <Text style={styles.erro}>{vm.avisoCidade}</Text> : null}
+          {vm.ajustesCidade ? (
+            <BotaoPrimario titulo="Abrir Ajustes" variante="contorno" icone="settings" onPress={vm.abrirAjustes} />
+          ) : null}
         </View>
 
         <View style={styles.envio}>

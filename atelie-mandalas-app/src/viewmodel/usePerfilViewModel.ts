@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Linking } from 'react-native';
 import { Perfil } from '../model/Perfil';
 import { ErrosPerfil, PerfilService } from '../services/PerfilService';
 import { ImagemService, ResultadoImagem } from '../services/ImagemService';
@@ -16,8 +17,10 @@ export interface PerfilViewModel {
   carregando: boolean;
   erro: string | null; // não deu para ler o perfil salvo
   avisoFoto: string | null; // permissão negada ou câmera que não abriu
+  ajustesFoto: boolean; // true quando a permissão da câmera ou da galeria foi negada
   buscandoCidade: boolean;
   avisoCidade: string | null; // permissão negada, GPS desligado ou cidade não encontrada
+  ajustesCidade: boolean; // true quando a permissão da localização foi negada
   distanciaTexto: string | null; // "Você está a 4 km do ateliê." Só nesta visita: não é guardada
   salvando: boolean;
   erroSalvar: string | null;
@@ -25,6 +28,7 @@ export interface PerfilViewModel {
   emailDaConta: string | null; // e-mail de quem está logado
   avisoConta: string | null; // se sair da conta falhar
   recarregar: () => void;
+  abrirAjustes: () => void; // abre os Ajustes do app no celular, para liberar a permissão
   sairDaConta: () => void;
   alterarNome: (texto: string) => void;
   alterarWhatsapp: (texto: string) => void;
@@ -38,7 +42,7 @@ export interface PerfilViewModel {
 
 // Um aviso para cada jeito de a localização não dar certo. Em todos, a cliente pode digitar a cidade.
 const AVISOS_LOCALIZACAO: Record<Exclude<ResultadoLocalizacao['tipo'], 'ok'>, string> = {
-  'sem-permissao': 'Sem acesso à localização. Você pode liberar nos Ajustes do celular ou digitar a cidade.',
+  'sem-permissao': 'Sem acesso à localização. Você pode liberar nos Ajustes ou digitar a cidade.',
   'gps-desligado': 'A localização do celular está desligada. Ligue nos Ajustes ou digite a cidade.',
   falhou: 'Não foi possível descobrir a sua cidade agora. Você pode digitá-la.',
 };
@@ -50,8 +54,10 @@ export function usePerfilViewModel(): PerfilViewModel {
   const { perfil: salvo, carregando, erro, recarregar, salvar: salvarNoContexto } = usePerfil();
   const [perfil, setPerfil] = useState<Perfil>(salvo);
   const [avisoFoto, setAvisoFoto] = useState<string | null>(null);
+  const [ajustesFoto, setAjustesFoto] = useState(false);
   const [buscandoCidade, setBuscandoCidade] = useState(false);
   const [avisoCidade, setAvisoCidade] = useState<string | null>(null);
+  const [ajustesCidade, setAjustesCidade] = useState(false);
   const [distanciaTexto, setDistanciaTexto] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [erroSalvar, setErroSalvar] = useState<string | null>(null);
@@ -75,7 +81,9 @@ export function usePerfilViewModel(): PerfilViewModel {
     setTentouSalvar(false);
     setSalvoAgora(false);
     setAvisoFoto(null);
+    setAjustesFoto(false);
     setAvisoCidade(null);
+    setAjustesCidade(false);
     setDistanciaTexto(null);
   }, [salvo]);
 
@@ -88,11 +96,14 @@ export function usePerfilViewModel(): PerfilViewModel {
   // A foto aparece na hora, mas só vai para a pasta do app quando a cliente toca em "Salvar".
   async function usarImagem(pedir: () => Promise<ResultadoImagem>, origem: 'câmera' | 'galeria') {
     setAvisoFoto(null);
+    setAjustesFoto(false);
     try {
       const resultado = await pedir();
       if (resultado.tipo === 'foto') alterar({ fotoUri: resultado.uri });
       if (resultado.tipo === 'sem-permissao') {
+        // Negar não trava o app: o perfil funciona sem foto, e o botão leva direto aos Ajustes.
         setAvisoFoto(`Sem acesso à ${origem}. Você pode liberar nos Ajustes do celular.`);
+        setAjustesFoto(true);
       }
       // 'cancelado': a pessoa desistiu, não há nada a fazer.
     } catch {
@@ -104,6 +115,7 @@ export function usePerfilViewModel(): PerfilViewModel {
   // A distância aparece na hora e não é guardada: o app guarda só a cidade.
   async function usarMinhaLocalizacao() {
     setAvisoCidade(null);
+    setAjustesCidade(false);
     setBuscandoCidade(true);
     try {
       const resultado = await LocalizacaoService.buscarCidade();
@@ -112,12 +124,22 @@ export function usePerfilViewModel(): PerfilViewModel {
         setDistanciaTexto(`Você está a ${formatarDistancia(resultado.distanciaKm)} do ateliê.`);
       } else {
         setAvisoCidade(AVISOS_LOCALIZACAO[resultado.tipo]);
+        // Só a permissão negada se resolve nos Ajustes do app. GPS desligado é nos ajustes do sistema.
+        setAjustesCidade(resultado.tipo === 'sem-permissao');
       }
     } catch {
       setAvisoCidade(AVISOS_LOCALIZACAO.falhou);
     } finally {
       setBuscandoCidade(false);
     }
+  }
+
+  // Depois de negar, o sistema pode nem perguntar de novo (canAskAgain = false).
+  // O único caminho para liberar é a tela de Ajustes do app, que o Linking abre direto.
+  function abrirAjustes() {
+    Linking.openSettings().catch(() => {
+      // Se não abrir, o aviso na tela já diz onde liberar.
+    });
   }
 
   // Sai da conta: o Firebase apaga a sessão do SecureStore, e a aba Perfil volta sozinha
@@ -160,8 +182,10 @@ export function usePerfilViewModel(): PerfilViewModel {
     carregando,
     erro,
     avisoFoto,
+    ajustesFoto,
     buscandoCidade,
     avisoCidade,
+    ajustesCidade,
     distanciaTexto,
     salvando,
     erroSalvar,
@@ -171,6 +195,7 @@ export function usePerfilViewModel(): PerfilViewModel {
     recarregar: () => {
       recarregar();
     },
+    abrirAjustes,
     sairDaConta,
     alterarNome: (texto) => alterar({ nome: texto }),
     alterarWhatsapp: (texto) => alterar({ whatsapp: formatarTelefone(texto) }), // máscara enquanto digita
