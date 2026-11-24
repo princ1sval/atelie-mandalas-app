@@ -13,6 +13,7 @@ export interface BotaoPrimarioProps {
   carregando?: boolean; // mostra um indicador e bloqueia novos toques
   desabilitado?: boolean;
   style?: StyleProp<ViewStyle>; // quem usa pode ajustar o layout (ex.: flex: 1)
+  testID?: string; // usado pelos testes end-to-end (Maestro)
 }
 
 // Cor do texto e do ícone em cada variante.
@@ -31,6 +32,7 @@ export function BotaoPrimario({
   carregando = false,
   desabilitado = false,
   style,
+  testID,
 }: BotaoPrimarioProps) {
   const inativo = desabilitado || carregando;
   const corConteudo = COR_CONTEUDO[variante];
@@ -39,6 +41,7 @@ export function BotaoPrimario({
     <Pressable
       onPress={onPress}
       disabled={inativo}
+      testID={testID}
       accessibilityRole="button"
       // O nome do botão é o título: sem isso, o leitor de tela leria também o ícone.
       accessibilityLabel={titulo}

@@ -5,13 +5,15 @@ export interface ChipProps {
   rotulo: string;
   selecionado: boolean;
   onPress: () => void;
+  testID?: string; // usado pelos testes end-to-end (Maestro)
 }
 
 // Botão pequeno de seleção: filtro de temas (Portfólio) e escolha de tema/tamanho (Encomenda).
-export function Chip({ rotulo, selecionado, onPress }: ChipProps) {
+export function Chip({ rotulo, selecionado, onPress, testID }: ChipProps) {
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
       accessibilityRole="button"
       accessibilityState={{ selected: selecionado }}
       hitSlop={6} // aumenta a área de toque sem mudar o tamanho visual

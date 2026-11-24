@@ -44,16 +44,29 @@ export function AppNavigator() {
     >
       {/* Com seis abas, cada nome tem uns 52 px no iPhone menor. Os nomes longos ganham uma
           versão curta só na barra (tabBarLabel); o title completo continua valendo no resto. */}
-      <Tab.Screen name="Inicio" component={InicioScreen} options={{ title: 'Início' }} />
+      {/* tabBarButtonTestID: nome fixo de cada aba para os testes end-to-end (Maestro). */}
+      <Tab.Screen name="Inicio" component={InicioScreen} options={{ title: 'Início', tabBarButtonTestID: 'aba-inicio' }} />
       <Tab.Screen
         name="ProntaEntregaTab"
         component={ProntaEntregaStack}
-        options={{ title: 'Pronta entrega', tabBarLabel: 'Prontas' }}
+        options={{ title: 'Pronta entrega', tabBarLabel: 'Prontas', tabBarButtonTestID: 'aba-prontas' }}
       />
-      <Tab.Screen name="PortfolioTab" component={PortfolioStack} options={{ title: 'Portfólio' }} />
-      <Tab.Screen name="Encomendar" component={EncomendaStack} options={{ title: 'Encomendar', tabBarLabel: 'Pedidos' }} />
-      <Tab.Screen name="Duvidas" component={FaqScreen} options={{ title: 'Dúvidas' }} />
-      <Tab.Screen name="PerfilTab" component={PerfilStack} options={{ title: 'Perfil' }} />
+      <Tab.Screen
+        name="PortfolioTab"
+        component={PortfolioStack}
+        options={{ title: 'Portfólio', tabBarButtonTestID: 'aba-portfolio' }}
+      />
+      <Tab.Screen
+        name="Encomendar"
+        component={EncomendaStack}
+        options={{ title: 'Encomendar', tabBarLabel: 'Pedidos', tabBarButtonTestID: 'aba-pedidos' }}
+      />
+      <Tab.Screen name="Duvidas" component={FaqScreen} options={{ title: 'Dúvidas', tabBarButtonTestID: 'aba-duvidas' }} />
+      <Tab.Screen
+        name="PerfilTab"
+        component={PerfilStack}
+        options={{ title: 'Perfil', tabBarButtonTestID: 'aba-perfil' }}
+      />
     </Tab.Navigator>
   );
 }

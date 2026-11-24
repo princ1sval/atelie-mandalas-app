@@ -105,6 +105,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
         ) : null}
 
         <CampoTexto
+          testID="campo-nome"
           rotulo="Seu nome"
           placeholder="Como podemos te chamar?"
           value={vm.pedido.nome}
@@ -114,6 +115,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
         />
 
         <CampoTexto
+          testID="campo-whatsapp"
           rotulo="WhatsApp"
           placeholder="(00) 00000-0000"
           value={vm.pedido.whatsapp}
@@ -128,6 +130,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
             {vm.opcoesTema.map((opcao) => (
               <Chip
                 key={opcao.valor}
+                testID={`tema-${opcao.valor}`}
                 rotulo={opcao.rotulo}
                 selecionado={vm.pedido.tema === opcao.valor}
                 onPress={() => vm.atualizarCampo('tema', opcao.valor)}
@@ -143,6 +146,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
             {vm.tamanhos.map((tamanho) => (
               <Chip
                 key={tamanho}
+                testID={`tamanho-${tamanho}`}
                 rotulo={`${tamanho} cm`}
                 selecionado={vm.pedido.tamanhoCm === tamanho}
                 onPress={() => vm.atualizarCampo('tamanhoCm', tamanho)}
@@ -159,6 +163,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
         />
 
         <CampoTexto
+          testID="campo-ideia"
           rotulo="Conte sua ideia"
           placeholder="Para quem é, o que a peça deve representar, referências…"
           value={vm.pedido.ideia}
@@ -192,7 +197,13 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
         </View>
 
         <View style={styles.envio}>
-          <BotaoPrimario titulo="Enviar pedido" icone="send" onPress={enviar} carregando={vm.enviando} />
+          <BotaoPrimario
+            titulo="Enviar pedido"
+            icone="send"
+            onPress={enviar}
+            carregando={vm.enviando}
+            testID="botao-enviar-pedido"
+          />
           {vm.mensagemFormulario ? (
             <Text style={[styles.erro, styles.centralizado]}>{vm.mensagemFormulario}</Text>
           ) : null}
@@ -226,6 +237,7 @@ export function EncomendaScreen({ route, navigation }: EncomendaScreenProps) {
             </Text>
             <BotaoPrimario titulo="Fazer outro pedido" onPress={fazerOutroPedido} style={styles.botaoModal} />
             <BotaoPrimario
+              testID="botao-ver-meus-pedidos"
               titulo="Ver meus pedidos"
               variante="contorno"
               icone="clock"

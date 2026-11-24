@@ -22,7 +22,12 @@ export function GradeMandalas({ mandalas, onAbrirMandala, mensagemVazia }: Grade
       keyExtractor={(mandala) => mandala.id}
       numColumns={colunas}
       renderItem={({ item }) => (
-        <MandalaCard mandala={item} onPress={() => onAbrirMandala(item.id)} style={{ width: larguraCard }} />
+        <MandalaCard
+          mandala={item}
+          onPress={() => onAbrirMandala(item.id)}
+          style={{ width: larguraCard }}
+          testID={`mandala-${item.id}`}
+        />
       )}
       columnWrapperStyle={styles.linha}
       contentContainerStyle={styles.lista}
