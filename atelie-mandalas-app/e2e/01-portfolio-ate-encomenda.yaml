@@ -1,0 +1,52 @@
+# Fluxo 1: quem ainda não tem conta vê uma peça do portfólio e pede uma igual.
+# Também confere a persistência: o rascunho (AsyncStorage) sobrevive ao fechar e abrir o app.
+appId: host.exp.exponent
+name: Portfólio → Detalhe → "Quero uma assim" → rascunho salvo ao reabrir
+tags:
+  - sem-login
+---
+- runFlow: subflows/abrir-app.yaml
+
+# Portfólio filtrado pelo tema Pet
+- tapOn:
+    id: "aba-portfolio"
+- tapOn:
+    id: "filtro-pet"
+- tapOn:
+    id: "mandala-enc-patinhas"
+
+# Detalhe da peça do portfólio: o botão principal é "Quero uma assim"
+- assertVisible: "Patinhas"
+- tapOn:
+    id: "botao-acao-detalhe"
+
+# O formulário abre com a inspiração e o tema Pet já escolhidos
+- assertVisible: "Encomende a sua"
+- assertVisible: "Patinhas · tema Pet"
+- tapOn:
+    id: "campo-nome"
+- eraseText: 40
+- inputText: "Teste E2E"
+- hideKeyboard
+# O rascunho é salvo 500 ms depois da última alteração. Passar por outra aba dá esse tempo
+# (a aba Pedidos continua montada) e confere que a FAQ abre.
+- tapOn:
+    id: "aba-duvidas"
+- assertVisible: "Dúvidas frequentes"
+
+# Fecha e abre o app de novo: o rascunho volta do AsyncStorage
+- runFlow: subflows/abrir-app.yaml
+- tapOn:
+    id: "aba-pedidos"
+- assertVisible: "Patinhas · tema Pet"
+- assertVisible:
+    id: "campo-nome"
+    text: "Teste E2E"
+
+# Enviar sem preencher o resto mostra os erros, sem travar o app
+- scrollUntilVisible:
+    element:
+      id: "botao-enviar-pedido"
+- tapOn:
+    id: "botao-enviar-pedido"
+- assertVisible: "Confira os campos destacados acima."

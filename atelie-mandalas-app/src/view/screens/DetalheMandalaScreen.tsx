@@ -93,7 +93,12 @@ export function DetalheMandalaScreen({ route, navigation }: DetalheMandalaScreen
 
       {vm.acao ? (
         <View style={styles.acao}>
-          <BotaoPrimario titulo={vm.acao.rotulo} icone={ICONE_ACAO[vm.acao.tipo]} onPress={vm.executarAcao} />
+          <BotaoPrimario
+            titulo={vm.acao.rotulo}
+            icone={ICONE_ACAO[vm.acao.tipo]}
+            onPress={vm.executarAcao}
+            testID="botao-acao-detalhe"
+          />
           <Text style={[typography.pequeno, styles.centralizado]}>{vm.acao.ajuda}</Text>
           {vm.aviso ? <Text style={styles.aviso}>{vm.aviso}</Text> : null}
         </View>

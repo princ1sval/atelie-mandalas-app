@@ -7,15 +7,17 @@ export interface MandalaCardProps {
   mandala: Mandala;
   onPress: () => void;
   style?: StyleProp<ViewStyle>; // a tela decide a largura (ex.: colunas da FlatList)
+  testID?: string; // usado pelos testes end-to-end (Maestro)
 }
 
 // Card usado na Pronta Entrega (mostra preço) e no Portfólio (mostra o tema).
-export function MandalaCard({ mandala, onPress, style }: MandalaCardProps) {
+export function MandalaCard({ mandala, onPress, style, testID }: MandalaCardProps) {
   const ehProntaEntrega = mandala.origem === 'prontaEntrega';
 
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={`${mandala.nome}. Ver detalhes`}
       style={({ pressed }) => [styles.card, pressed && styles.pressionado, style]}

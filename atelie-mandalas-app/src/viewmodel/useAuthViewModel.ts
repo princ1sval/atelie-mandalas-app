@@ -35,7 +35,7 @@ export function useAuthViewModel(modo: ModoConta): AuthViewModel {
     try {
       if (modo === 'entrar') await AuthService.entrar(email, senha);
       else await AuthService.cadastrar(email, senha);
-      // Deu certo: a aba Perfil troca para o perfil sozinha, porque ouve o Firebase (useSessao).
+      // Deu certo: a aba Perfil troca para o perfil sozinha, porque o SessaoContext ouve o Firebase.
     } catch (falha) {
       setErro(AuthService.mensagemDeErro(falha));
     } finally {

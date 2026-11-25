@@ -1,0 +1,76 @@
+# Fluxo 2, o mais importante do app: entrar na conta, enviar uma encomenda
+# e ver o pedido salvo no histórico (SQLite).
+# Precisa de um usuário de teste criado no console do Firebase (Authentication > Users):
+#   maestro test -e EMAIL=e2e@exemplo.com -e SENHA=senhaDeTeste e2e/02-login-encomenda-historico.yaml
+appId: host.exp.exponent
+name: Entrar → enviar encomenda → ver em Meus pedidos
+tags:
+  - com-login
+---
+- runFlow: subflows/abrir-app.yaml
+
+# Login na aba Perfil (se a sessão já estiver salva no SecureStore, pula esta parte)
+- tapOn:
+    id: "aba-perfil"
+- runFlow:
+    when:
+      visible:
+        id: "botao-entrar"
+    commands:
+      - tapOn:
+          id: "campo-email"
+      - inputText: ${EMAIL}
+      - tapOn:
+          id: "campo-senha"
+      - inputText: ${SENHA}
+      - hideKeyboard
+      - tapOn:
+          id: "botao-entrar"
+- extendedWaitUntil:
+    visible: "Meu perfil"
+    timeout: 20000
+
+# Formulário de encomenda
+- tapOn:
+    id: "aba-pedidos"
+- assertVisible: "Encomende a sua"
+- tapOn:
+    id: "campo-nome"
+- eraseText: 40
+- inputText: "Cliente E2E"
+- tapOn:
+    id: "campo-whatsapp"
+- eraseText: 20
+- inputText: "32999990000"
+- hideKeyboard
+- tapOn:
+    id: "tema-familia"
+- tapOn:
+    id: "tamanho-40"
+- scrollUntilVisible:
+    element:
+      id: "campo-ideia"
+- tapOn:
+    id: "campo-ideia"
+- inputText: "Mandala para a familia toda, em tons de verde"
+- hideKeyboard
+
+# A estimativa de 40 cm aparece antes do envio
+- scrollUntilVisible:
+    element:
+      text: ".*320 a R\\$.*410.*"
+- scrollUntilVisible:
+    element:
+      id: "botao-enviar-pedido"
+- tapOn:
+    id: "botao-enviar-pedido"
+
+# Confirmação com o protocolo e o histórico salvo no aparelho
+- extendedWaitUntil:
+    visible: "Pedido enviado!"
+    timeout: 15000
+- tapOn:
+    id: "botao-ver-meus-pedidos"
+- assertVisible: "Família · 40 cm"
+- assertVisible: "MM-\\d{6}"
+- assertVisible: ".*tons de verde.*"

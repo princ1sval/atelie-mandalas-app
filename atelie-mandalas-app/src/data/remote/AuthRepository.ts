@@ -49,7 +49,7 @@ export const authRepository: AuthRepository = {
   },
 
   // O Firebase avisa ao abrir o app (depois de ler a sessão salva) e a cada vez que alguém entra ou sai.
-  // Devolve a função que para de ouvir, como o PerfilService.observar.
+  // Devolve a função que para de ouvir: o SessaoProvider a chama no cleanup do useEffect.
   observar(ouvinte) {
     if (!auth) {
       ouvinte(null); // sem configuração, ninguém consegue entrar

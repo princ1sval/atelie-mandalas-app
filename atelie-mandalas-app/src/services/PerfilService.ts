@@ -1,4 +1,4 @@
-import { Perfil } from '../model/Perfil';
+import { criarPerfilVazio, Perfil } from '../model/Perfil';
 import { perfilRepository } from '../data/repositories/PerfilRepository';
 import { fotoRepository } from '../data/repositories/FotoRepository';
 import { ehTelefoneValido } from '../utils/validators';
@@ -6,30 +6,8 @@ import { ehTelefoneValido } from '../utils/validators';
 // Mensagem de erro por campo do perfil. Ex.: { nome: 'Informe seu nome.' }
 export type ErrosPerfil = Partial<Record<'nome' | 'whatsapp', string>>;
 
-// ---------- Aviso de mudança ----------
-// Início, Perfil e Encomenda ficam montados nas abas. Quando o perfil é salvo ou apagado,
-// o Service avisa quem está ouvindo e entrega o perfil novo, como o NetInfo.addEventListener
-// entrega o estado da conexão (seção 2.5).
-type Ouvinte = (perfil: Perfil) => void;
-const ouvintes = new Set<Ouvinte>();
-
-// Devolve a função que para de ouvir: é o que o useEffect chama ao desmontar a tela.
-function observar(ouvinte: Ouvinte): () => void {
-  ouvintes.add(ouvinte);
-  return () => {
-    ouvintes.delete(ouvinte);
-  };
-}
-
-function avisarMudanca(perfil: Perfil) {
-  ouvintes.forEach((ouvinte) => ouvinte(perfil));
-}
-
-// ---------- Perfil ----------
-
-function criarPerfilVazio(): Perfil {
-  return { nome: '', whatsapp: '', fotoUri: null };
-}
+// O Service guarda as regras e fala com os repositories. Quem compartilha o perfil entre as telas
+// é o PerfilContext (src/context): na Parte 1 isso era um observer manual aqui dentro.
 
 // O que vem do armazenamento é conferido campo a campo, como no rascunho:
 // um valor estranho volta ao padrão em vez de quebrar a tela.
@@ -83,16 +61,15 @@ async function salvar(novo: Perfil, anterior: Perfil): Promise<Perfil> {
   await perfilRepository.salvar(perfil);
 
   if (fotoMudou && anterior.fotoUri) fotoRepository.apagar(anterior.fotoUri);
-  avisarMudanca(perfil);
   return perfil;
 }
 
 // Apaga o perfil e a foto. Faz parte do "Apagar meus dados" (seção 7.3).
+// Depois disso, quem chamou pede ao PerfilContext para recarregar, e as telas mostram o perfil vazio.
 async function apagar(): Promise<void> {
   const perfil = await carregar();
   if (perfil.fotoUri) fotoRepository.apagar(perfil.fotoUri);
   await perfilRepository.limpar();
-  avisarMudanca(criarPerfilVazio());
 }
 
 export const PerfilService = {
@@ -102,5 +79,4 @@ export const PerfilService = {
   temErros,
   salvar,
   apagar,
-  observar,
 };

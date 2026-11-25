@@ -52,6 +52,7 @@ export function PortfolioScreen({ navigation }: PortfolioScreenProps) {
         {vm.opcoesFiltro.map((opcao) => (
           <Chip
             key={opcao.valor}
+            testID={`filtro-${opcao.valor}`}
             rotulo={opcao.rotulo}
             selecionado={vm.filtro === opcao.valor}
             onPress={() => vm.selecionarFiltro(opcao.valor)}

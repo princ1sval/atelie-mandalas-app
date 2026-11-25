@@ -33,6 +33,7 @@ export function EntrarScreen({ navigation }: EntrarScreenProps) {
         />
 
         <CampoTexto
+          testID="campo-email"
           rotulo="E-mail"
           placeholder="seuemail@exemplo.com"
           value={vm.email}
@@ -46,6 +47,7 @@ export function EntrarScreen({ navigation }: EntrarScreenProps) {
         />
 
         <CampoTexto
+          testID="campo-senha"
           rotulo="Senha"
           placeholder="Sua senha"
           value={vm.senha}
@@ -58,7 +60,13 @@ export function EntrarScreen({ navigation }: EntrarScreenProps) {
         />
 
         <View style={styles.envio}>
-          <BotaoPrimario titulo="Entrar" icone="log-in" onPress={entrar} carregando={vm.enviando} />
+          <BotaoPrimario
+            titulo="Entrar"
+            icone="log-in"
+            onPress={entrar}
+            carregando={vm.enviando}
+            testID="botao-entrar"
+          />
           {vm.erro ? <Text style={[styles.erro, styles.centralizado]}>{vm.erro}</Text> : null}
         </View>
 
